@@ -22,7 +22,7 @@ Statistics: :fire: code is available & stars >= 100 &emsp;|&emsp; :star: citatio
 ### Before 2022
 - [[Nature 2022](https://www.nature.com/articles/s41586-021-04357-7)] Sony Sophy Racing: Outracing champion Gran Turismo drivers with deep reinforcement learning :fire:
 - [[Arxiv 2022](https://arxiv.org/pdf/2211.09378.pdf)] Im Racing: Outracing Human Racers with Model-based Planning and Control for Time-trial Racing
-- - [[Arxiv 2022](https://arxiv.org/ftp/arxiv/papers/2205/2205.15979.pdf)] Software: TUM autonomous motorsport: An autonomous racing software for the Indy Autonomous Challenge
+- [[Arxiv 2022](https://arxiv.org/ftp/arxiv/papers/2205/2205.15979.pdf)] Software: TUM autonomous motorsport: An autonomous racing software for the Indy Autonomous Challenge
 - [[IEEE 2022](https://arxiv.org/pdf/2202.07008.pdf)] Allgemein: Autonomous Vehicles on the Edge: A Survey on Autonomous Vehicle Racing :fire:
 
 
