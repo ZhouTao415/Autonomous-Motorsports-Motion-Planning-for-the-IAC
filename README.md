@@ -20,7 +20,7 @@ Statistics: :fire: code is available & stars >= 100 &emsp;|&emsp; :star: citatio
 
 
 ### Before 2022
-- [[nature 2022](https://www.nature.com/articles/s41586-021-04357-7)] Outracing champion Gran Turismo drivers with deep reinforcement learning :fire:
+- [[Nature 2022](https://www.nature.com/articles/s41586-021-04357-7)] Outracing champion Gran Turismo drivers with deep reinforcement learning :fire:
 - [[Arxiv 2022](https://arxiv.org/pdf/2211.09378.pdf)] Outracing Human Racers with Model-based Planning and Control for Time-trial Racing
 - [[IEEE 2022](https://arxiv.org/pdf/2202.07008.pdf)] Autonomous Vehicles on the Edge: A Survey on Autonomous Vehicle Racing :fire:
 
