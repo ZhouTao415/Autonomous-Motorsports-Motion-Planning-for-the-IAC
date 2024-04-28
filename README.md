@@ -28,7 +28,9 @@ Statistics: :fire: code is available & stars >= 100 &emsp;|&emsp; :star: citatio
 
 ### Before 2021
 - [[Arxiv 2021](https://arxiv.org/pdf/2104.11106.pdf)] Im Racing: Formula RL: Deep Reinforcement Learning for Autonomous Racing using Telemetry Data
+- [[IEEE 2021](https://arxiv.org/pdf/1909.06963)] Stochastic Dynamic Games in Belief Space
 - [[IEEE 2011](https://www.ri.cmu.edu/pub_files/2011/5/20100914_icra2011-mcnaughton.pdf)] Motion Planning for Autonomous Driving with a Conformal Spatiotemporal Lattice [[GitHUb](https://github.com/KumarRobotics/conformal_lattice_planner?tab=readme-ov-file)] :fire: :star:
+
 
 
 <a id="Books"></a>
