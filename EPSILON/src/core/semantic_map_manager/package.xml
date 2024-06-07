@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>semantic_map_manager</name>
+  <version>0.0.0</version>
+  <description>semantic_map_manager</description>
+  <maintainer email="wdingae@todo.com">HKUST_UAV_GROUP</maintainer>
+  <license>TODO</license>
+
+  <!-- Build and run dependencies -->
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <depend>rclcpp</depend>
+  <depend>rclpy</depend>
+  <depend>common</depend>
+  <depend>motion_predictor</depend>
+  <depend>vehicle_msgs</depend>
+  <depend>visualization_msgs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>tf2_ros</depend>
+  <depend>tf2_geometry_msgs</depend>
+
+
+  <!-- Export tags can include additional information needed for other tools -->
+  <export>
+    <!-- Additional tool-specific tags go here -->
+  </export>
+</package>
