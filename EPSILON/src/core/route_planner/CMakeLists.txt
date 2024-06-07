@@ -1,57 +1,68 @@
 cmake_minimum_required(VERSION 3.5)
 project(route_planner)
 
-# Use C++ 14
-set(CMAKE_CXX_STANDARD 14)
+# Enforce C++14 standard
+if(NOT CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 14)
+endif()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_BUILD_TYPE "Release")
-add_compile_options(-Wall -Wextra -Wpedantic -O3)
+add_compile_options(-O3 -Wall)
 
-# Find ROS 2 dependencies
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+
+# Find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(visualization_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
-find_package(common_interfaces REQUIRED)
+find_package(common REQUIRED)
 find_package(semantic_map_manager REQUIRED)
 
-# Declare include directories
+# Include directories
 include_directories(
     include
-    ${common_interfaces_INCLUDE_DIRS}
+    ${common_INCLUDE_DIRS}
     ${semantic_map_manager_INCLUDE_DIRS}
 )
 
-# Create a library
-add_library(hkust_pl_rp
+# Define library
+add_library(hkust_pl_rp SHARED
     src/route_planner/route_planner.cc
 )
 
-# Link libraries
-ament_target_dependencies(hkust_pl_rp
+target_link_libraries(hkust_pl_rp
+    hkust_pl_common
+    hkust_pl_smm
+)
+
+# Exporting and installation setups
+ament_export_libraries(hkust_pl_rp)
+
+ament_export_dependencies(
     rclcpp
     visualization_msgs
     sensor_msgs
-    common_interfaces
+    common
     semantic_map_manager
 )
 
-# Export information
-ament_export_include_directories(include)
-ament_export_libraries(hkust_pl_rp)
-
-# Install the library
-install(TARGETS hkust_pl_rp
-    ARCHIVE DESTINATION lib
-    LIBRARY DESTINATION lib
-    RUNTIME DESTINATION bin
+ament_export_include_directories(
+    include
+    ${common_INCLUDE_DIRS}
+    ${semantic_map_manager_INCLUDE_DIRS}
 )
 
-# Install header files
-install(DIRECTORY include/${PROJECT_NAME}/
-    DESTINATION include/${PROJECT_NAME}
-    FILES_MATCHING PATTERN "*.h"
-    PATTERN ".svn" EXCLUDE
+# Install the targets
+install(TARGETS hkust_pl_rp
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
+  INCLUDES DESTINATION include
+)
+
+install(DIRECTORY include/
+  DESTINATION include
 )
 
 ament_package()

@@ -14,6 +14,7 @@ find_package(std_msgs REQUIRED)
 find_package(vehicle_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
+find_package(OpenCV REQUIRED)
 
 # Define include directories
 include_directories(
@@ -23,6 +24,9 @@ include_directories(
   ${vehicle_msgs_INCLUDE_DIRS}
   ${tf2_INCLUDE_DIRS}
   ${tf2_ros_INCLUDE_DIRS}
+  ${OpenCV_INCLUDE_DIRS}
 )
 
 ament_package()
+
+

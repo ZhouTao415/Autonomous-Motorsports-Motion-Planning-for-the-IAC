@@ -20,8 +20,7 @@
   <depend>tf2_geometry_msgs</depend>
 
 
-  <!-- Export tags can include additional information needed for other tools -->
   <export>
-    <!-- Additional tool-specific tags go here -->
+    <build_type>ament_cmake</build_type>
   </export>
 </package>

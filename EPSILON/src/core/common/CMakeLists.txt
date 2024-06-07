@@ -6,6 +6,7 @@ if(NOT CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 14)
 endif()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_BUILD_TYPE "Release")
 add_compile_options(-O3 -Wall)
 
 # Set additional CMake modules paths if necessary
@@ -16,7 +17,9 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(visualization_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
 find_package(Protobuf REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(Glog REQUIRED)
@@ -40,6 +43,8 @@ include_directories(
   ${GLOG_INCLUDE_DIRS}
   ${PROTOBUF_INCLUDE_DIRS}
   ${OOQP_INCLUDE_DIRS}
+  ${tf2_ros_INCLUDE_DIRS}
+  ${tf2_geometry_msgs_INCLUDE_DIRS}
 )
 
 # Link directories for third-party libraries
@@ -52,7 +57,7 @@ set(THIRD_PARTY_LIBRARIES
 )
 
 # Define the hkust_pl_ooqp_itf library
-add_library(hkust_pl_ooqp_itf
+add_library(hkust_pl_ooqp_itf 
     src/common/solver/ooqp_interface.cc
     src/common/solver/qp_solver.cc
 )
@@ -90,10 +95,14 @@ target_link_libraries(hkust_pl_common
     opencv_core
     opencv_highgui
     hkust_pl_ooqp_itf
+    ${tf2_LIBRARIES}
+    ${tf2_ros_LIBRARIES}
+    ${tf2_geometry_msgs_LIBRARIES}
 )
 
 # Exporting and installation setups
 ament_export_libraries(hkust_pl_common hkust_pl_ooqp_itf)
+
 ament_export_dependencies(
     rclcpp
     visualization_msgs
@@ -103,7 +112,11 @@ ament_export_dependencies(
     Glog
     OpenCV
     Protobuf
+    tf2
+    tf2_ros
+    tf2_geometry_msgs
 )
+
 ament_export_include_directories(
     include
     ${THIRD_PARTY_INCLUDE_DIRS}
@@ -112,12 +125,17 @@ ament_export_include_directories(
     ${OpenCV_INCLUDE_DIRS}
     ${OOQP_INCLUDE_DIRS}
     ${PROJECT_SOURCE_DIR}/thirdparty
+    ${tf2_ros_INCLUDE_DIRS}
+    ${tf2_geometry_msgs_INCLUDE_DIRS}
 )
 
-install(TARGETS hkust_pl_common
-  # DESTINATION lib/${PROJECT_NAME}
-  DESTINATION lib/${PROJECT_NAME}
 
+install(TARGETS hkust_pl_common
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+install(DIRECTORY include/
+  DESTINATION include
 )
 
 install(TARGETS hkust_pl_common hkust_pl_ooqp_itf
@@ -126,11 +144,6 @@ install(TARGETS hkust_pl_common hkust_pl_ooqp_itf
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
   INCLUDES DESTINATION include
-)
-
-
-install(DIRECTORY include/
-  DESTINATION include
 )
 
 ament_package()

@@ -22,21 +22,12 @@ find_package(forward_simulator REQUIRED)
 
 # Define include directories
 include_directories(
-    inc
+    include
     ${common_INCLUDE_DIRS}
     ${vehicle_model_INCLUDE_DIRS}
     ${forward_simulator_INCLUDE_DIRS}
-    ${rclcpp_INCLUDE_DIRS}
     ${visualization_msgs_INCLUDE_DIRS}
     ${sensor_msgs_INCLUDE_DIRS}
-)
-
-# Export include directories
-ament_export_include_directories(
-    inc
-    ${common_INCLUDE_DIRS}
-    ${vehicle_model_INCLUDE_DIRS}
-    ${forward_simulator_INCLUDE_DIRS}
 )
 
 # Export libraries
@@ -52,9 +43,17 @@ ament_export_dependencies(
     forward_simulator
 )
 
+# Export include directories
+ament_export_include_directories(
+    include
+    ${common_INCLUDE_DIRS}
+    ${vehicle_model_INCLUDE_DIRS}
+    ${forward_simulator_INCLUDE_DIRS}
+)
+
 # Install include files
-install(DIRECTORY inc/
-  DESTINATION inc
+install(DIRECTORY include/
+  DESTINATION include
 )
 
 ament_package()

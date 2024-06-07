@@ -1,11 +1,13 @@
 cmake_minimum_required(VERSION 3.5)
 project(vehicle_model)
 
-# Set C++ standard
-set(CMAKE_CXX_STANDARD 14)
+# Enforce C++14 standard
+if(NOT CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 14)
+endif()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_BUILD_TYPE "Release")
-add_compile_options(-O3 -Wall -DBOOST_BIND_GLOBAL_PLACEHOLDERS)
+add_compile_options(-O3 -Wall)
 
 # Find ROS 2 and other package dependencies
 find_package(ament_cmake REQUIRED)
@@ -21,7 +23,7 @@ set(THIRD_PARTY_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/thirdparty)
 
 # Define include directories
 include_directories(
-    inc
+    include
     ${EIGEN3_INCLUDE_DIR}
     ${Boost_INCLUDE_DIRS}
     ${common_INCLUDE_DIRS}
@@ -29,19 +31,8 @@ include_directories(
     ${THIRD_PARTY_INCLUDE_DIRS}
 )
 
-# Declare ament package dependencies
-ament_export_dependencies(
-    rclcpp 
-    visualization_msgs 
-    sensor_msgs 
-    geometry_msgs 
-    Eigen3 
-    common
-    Boost
-)
-
 # Define libraries
-add_library(hkust_pl_vehicle_model
+add_library(hkust_pl_vehicle_model 
     src/vehicle_model/vehicle_model.cc
     src/vehicle_model/ideal_steer_model.cc
     src/vehicle_model/idm_model.cc
@@ -55,8 +46,26 @@ add_library(hkust_pl_vehicle_model
 target_link_libraries(hkust_pl_vehicle_model
     hkust_pl_common
     ${Boost_LIBRARIES}
-    ${common_INCLUDE_DIRS}
+)
 
+ament_export_libraries(hkust_pl_vehicle_model)
+# Declare ament package dependencies
+ament_export_dependencies(
+    rclcpp 
+    visualization_msgs 
+    sensor_msgs 
+    geometry_msgs 
+    Eigen3 
+    common
+    Boost
+)
+
+# Export include directories
+ament_export_include_directories(
+    include 
+    ${common_INCLUDE_DIRS}
+    ${EIGEN3_INCLUDE_DIR}
+    ${THIRD_PARTY_INCLUDE_DIRS}
 )
 
 # Specify dependencies for the target
@@ -70,31 +79,23 @@ ament_target_dependencies(hkust_pl_vehicle_model
     Boost
 )
 
-# Export include directories
-ament_export_include_directories(
-    inc 
-    ${common_INCLUDE_DIRS}
-    ${EIGEN3_INCLUDE_DIR}
-    ${THIRD_PARTY_INCLUDE_DIRS}
+
+
+install(TARGETS hkust_pl_vehicle_model
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+install(DIRECTORY include/
+  DESTINATION include
 )
 
 # Export libraries
-ament_export_libraries(hkust_pl_vehicle_model)
-
 install(TARGETS hkust_pl_vehicle_model
   EXPORT export_hkust_pl_vehicle_model
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
   INCLUDES DESTINATION include
-)
-
-# Install targets
-#install the hearder files so that other packages can include.
-install(DIRECTORY include/${PROJECT_NAME}/
-  DESTINATION include/${PROJECT_NAME}
-  FILES_MATCHING PATTERN "*.h"
-  PATTERN ".svn" EXCLUDE
 )
 
 ament_package()

@@ -15,5 +15,7 @@
   <depend>visualization_msgs</depend>
   <depend>sensor_msgs</depend>
 
-  <!-- Documentation and other tags can be included here -->
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
 </package>

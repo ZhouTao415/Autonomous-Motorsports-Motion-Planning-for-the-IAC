@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.5)
 project(vehicle_msgs)
 
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
+
 # Find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
@@ -12,7 +16,7 @@ find_package(common REQUIRED)
 
 # Include directories
 include_directories(
-  inc
+  include
   ${common_INCLUDE_DIRS}
 )
 
@@ -39,20 +43,19 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 )
 
 ament_export_include_directories(
-    inc
+    include
     ${common_INCLUDE_DIRS}
 )
 ament_export_dependencies(rosidl_default_runtime)
 
-# Installation of headers
-install(DIRECTORY inc/${PROJECT_NAME}/
-  DESTINATION include/${PROJECT_NAME}
-  FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp"
-)
 
 # Install the package share items
 install(DIRECTORY msg
   DESTINATION share/${PROJECT_NAME}
+)
+
+install(DIRECTORY include/
+  DESTINATION include
 )
 
 ament_package()

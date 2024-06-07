@@ -10,12 +10,8 @@
   <buildtool_depend>ament_cmake</buildtool_depend>
   <depend>rclcpp</depend>
   <depend>rclpy</depend>
-  <depend>common_interfaces</depend>
+  <depend>common</depend>
   <depend>semantic_map_manager</depend>
-  <depend>visualization_msgs</depend>
-  <depend>sensor_msgs</depend>
-  <depend>geometry_msgs</depend>
-  <depend>protobuf</depend>
 
   <!-- Export tags can include additional information needed for other tools -->
   <export>

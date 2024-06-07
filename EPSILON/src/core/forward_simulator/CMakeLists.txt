@@ -15,21 +15,12 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(visualization_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
-
-# Find other dependencies
 find_package(common REQUIRED)
 find_package(vehicle_model REQUIRED)
 
 # Define include directories
 include_directories(
-    inc
-    ${common_INCLUDE_DIRS}
-    ${vehicle_model_INCLUDE_DIRS}
-)
-
-# Export include directories
-ament_export_include_directories(
-    inc
+    include
     ${common_INCLUDE_DIRS}
     ${vehicle_model_INCLUDE_DIRS}
 )
@@ -37,12 +28,23 @@ ament_export_include_directories(
 # Export libraries
 ament_export_libraries(${vehicle_model_LIBRARIES})
 
-# Install header files
-install(DIRECTORY inc/${PROJECT_NAME}/
-  DESTINATION inc/${PROJECT_NAME}  # Corrected to a single, valid destination
-  FILES_MATCHING
-  PATTERN "*.h"
-  PATTERN ".svn" EXCLUDE
+ament_export_dependencies(
+  rclcpp 
+  visualization_msgs 
+  sensor_msgs 
+  common 
+  vehicle_model
+)
+
+
+# Export include directories
+ament_export_include_directories(
+    include
+    ${vehicle_model_INCLUDE_DIRS}
+)
+
+install(DIRECTORY include/
+  DESTINATION include
 )
 
 ament_package()

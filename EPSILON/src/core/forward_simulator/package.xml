@@ -7,18 +7,13 @@
   <license>TODO</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
-  <build_depend>rclcpp</build_depend>
-  <build_depend>visualization_msgs</build_depend>
-  <build_depend>sensor_msgs</build_depend>
-  <build_depend>common</build_depend>
-  <build_depend>vehicle_model</build_depend>
 
-  <exec_depend>rclcpp</exec_depend>
-  <exec_depend>visualization_msgs</exec_depend>
-  <exec_depend>sensor_msgs</exec_depend>
-  <exec_depend>common</exec_depend>
-  <exec_depend>vehicle_model</exec_depend>
+  <depend>rclcpp</depend>
+  <depend>rospy</depend>
+  <depend>common</depend>
+  <depend>vehicle_model</depend>
 
+  <!-- Export dependencies -->
   <export>
     <build_type>ament_cmake</build_type>
   </export>
