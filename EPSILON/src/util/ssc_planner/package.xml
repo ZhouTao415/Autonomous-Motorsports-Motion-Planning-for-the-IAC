@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>ssc_planner</name>
+  <version>0.0.0</version>
+  <description>ssc_planner</description>
+  <maintainer email="wdingae@todo.com">HKUST_UAV_GROUP</maintainer>
+  <license>TODO</license>
+
+  <!-- Build and run dependencies -->
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <depend>rclcpp</depend>
+  <depend>rclpy</depend>
+  <depend>common_interfaces</depend>
+  <depend>semantic_map_manager</depend>
+  <depend>visualization_msgs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>protobuf</depend>
+
+  <!-- Export tags can include additional information needed for other tools -->
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

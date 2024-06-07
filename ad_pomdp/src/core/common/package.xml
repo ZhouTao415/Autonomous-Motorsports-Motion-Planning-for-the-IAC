@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>common</name>
+  <version>0.0.0</version>
+  <description>common</description>
+
+  <maintainer email="wdingae@todo.com">HKUST_UAV_GROUP</maintainer>
+  <license>TODO</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>rclcpp</depend>
+  <depend>visualization_msgs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>tf2_ros</depend>
+  <depend>Eigen3</depend>
+  <depend>glog</depend>
+  <depend>opencv</depend>
+  <depend>protobuf</depend>
+
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
