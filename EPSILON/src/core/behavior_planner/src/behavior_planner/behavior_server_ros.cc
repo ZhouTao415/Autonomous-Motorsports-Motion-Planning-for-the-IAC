@@ -2,17 +2,17 @@
 
 namespace planning {
 
-BehaviorPlannerServer::BehaviorPlannerServer(rclcpp::Node::SharedPtr nh, int ego_id)
-    : nh_(nh), work_rate_(20.0), ego_id_(ego_id) {
-  p_visualizer_ = new BehaviorPlannerVisualizer(nh, &bp_, ego_id);
+BehaviorPlannerServer::BehaviorPlannerServer(const std::shared_ptr<rclcpp::Node>& node, int ego_id)
+    : Node("behavior_planner_server", node->get_node_options()), work_rate_(20.0), ego_id_(ego_id) {
+  p_visualizer_ = new BehaviorPlannerVisualizer(node, &bp_, ego_id_);
   p_input_smm_buff_ = new moodycamel::ReaderWriterQueue<SemanticMapManager>(
       config_.kInputBufferSize);
 }
 
-BehaviorPlannerServer::BehaviorPlannerServer(rclcpp::Node::SharedPtr nh,
+BehaviorPlannerServer::BehaviorPlannerServer(const std::shared_ptr<rclcpp::Node>& node,
                                              double work_rate, int ego_id)
-    : nh_(nh), work_rate_(work_rate), ego_id_(ego_id) {
-  p_visualizer_ = new BehaviorPlannerVisualizer(nh, &bp_, ego_id);
+    : Node("behavior_planner_server", node->get_node_options()), work_rate_(work_rate), ego_id_(ego_id) {
+  p_visualizer_ = new BehaviorPlannerVisualizer(node, &bp_, ego_id_);
   p_input_smm_buff_ = new moodycamel::ReaderWriterQueue<SemanticMapManager>(
       config_.kInputBufferSize);
 }
@@ -22,23 +22,24 @@ void BehaviorPlannerServer::PushSemanticMap(const SemanticMapManager& smm) {
 }
 
 void BehaviorPlannerServer::PublishData() {
-  p_visualizer_->PublishDataWithStamp(nh_->now());
+  p_visualizer_->PublishDataWithStamp(rclcpp::Clock(RCL_ROS_TIME).now());
 }
 
 void BehaviorPlannerServer::Init() {
   bp_.Init("bp");
   if (bp_.autonomous_level() >= 2) {
-    joy_sub_ = nh_->create_subscription<sensor_msgs::msg::Joy>(
-        "/joy", 10, std::bind(&BehaviorPlannerServer::JoyCallback, this, std::placeholders::_1));
+    joy_sub_ =
+        this->create_subscription<sensor_msgs::msg::Joy>(
+            "/joy", 10, std::bind(&BehaviorPlannerServer::JoyCallback, this, std::placeholders::_1));
   }
   bool use_sim_state = true;
-  nh_->declare_parameter("use_sim_state", rclcpp::ParameterValue(true));
-  nh_->get_parameter("use_sim_state", use_sim_state);
+  this->declare_parameter("use_sim_state", use_sim_state);
+  this->get_parameter("use_sim_state", use_sim_state);
   bp_.set_use_sim_state(use_sim_state);
   p_visualizer_->Init();
 }
 
-void BehaviorPlannerServer::JoyCallback(const sensor_msgs::msg::Joy::SharedPtr msg) {
+void BehaviorPlannerServer::JoyCallback(const sensor_msgs::msg::Joy::ConstSharedPtr msg) {
   if (bp_.autonomous_level() < 2) return;
   if (!is_hmi_enabled_) return;
   int msg_id;

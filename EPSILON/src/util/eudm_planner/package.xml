@@ -13,6 +13,7 @@
   <depend>common</depend>
   <depend>semantic_map_manager</depend>
   <depend>route_planner</depend>
+  <depend>vehicle_msgs</depend>
 
   <!-- Export tags can include additional information needed for other tools -->
   <export>

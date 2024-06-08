@@ -264,7 +264,7 @@ ErrorType BehaviorPlanner::OpenloopSimForward(
   traj->clear();
   traj->push_back(ego_semantic_vehicle.vehicle);
   surround_trajs->clear();
-  for (const auto v : agent_vehicles.semantic_vehicles) {
+  for (const auto &v : agent_vehicles.semantic_vehicles) {
     surround_trajs->insert(std::pair<int, vec_E<common::Vehicle>>(
         v.first, vec_E<common::Vehicle>()));
     surround_trajs->at(v.first).push_back(v.second.vehicle);
@@ -477,7 +477,7 @@ ErrorType BehaviorPlanner::EvaluateSinglePolicyTraj(
           std::max(2.0, distance_to_leading_vehicle);
     }
   }
-  decimal_t cost_efficiency = 0.5 (cost_efficiency_ego_to_desired_vel +
+  decimal_t cost_efficiency = 0.5 * (cost_efficiency_ego_to_desired_vel +
                                      cost_efficiency_leading_to_desired_vel);
 
   // * safety
@@ -525,7 +525,7 @@ ErrorType BehaviorPlanner::MultiAgentSimForward(
   traj->push_back(semantic_vehicle_set.semantic_vehicles.at(ego_id).vehicle);
 
   surround_trajs->clear();
-  for (const auto v : semantic_vehicle_set.semantic_vehicles) {
+  for (const auto &v : semantic_vehicle_set.semantic_vehicles) {
     if (v.first == ego_id) continue;
     surround_trajs->insert(std::pair<int, vec_E<common::Vehicle>>(
         v.first, vec_E<common::Vehicle>()));
@@ -705,8 +705,8 @@ ErrorType BehaviorPlanner::ConstructLaneFromSamples(
 
   int num_samples = static_cast<int>(samples.size());
   for (int i = 1; i < num_samples; i++) {
-    double dx = samples  - samples ;
-    double dy = samples  - samples ;
+    double dx = samples[i](0) - samples[i - 1](0);
+    double dy = samples[i](1) - samples[i - 1](1);
     d += std::hypot(dx, dy);
     para.push_back(d);
   }

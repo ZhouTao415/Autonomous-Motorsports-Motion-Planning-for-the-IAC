@@ -1,10 +1,14 @@
+/**
+ * @file eudm_planner_ros_adapter.h
+ * @brief planner server
+ * @version 0.1
+ * @date 2019-02
+ */
+
 #ifndef _CORE_EUDM_PLANNER_INC_EUDM_PLANNER_ROS_ADAPTER_H_
 #define _CORE_EUDM_PLANNER_INC_EUDM_PLANNER_ROS_ADAPTER_H_
 
 #include <assert.h>
-#include <tf/tf.h>
-#include <tf/transform_broadcaster.h>
-
 #include <functional>
 #include <iostream>
 #include <vector>
@@ -15,15 +19,14 @@
 #include "eudm_planner/eudm_manager.h"
 #include "eudm_planner/eudm_planner.h"
 #include <rclcpp/rclcpp.hpp>
-#include "visualization_msgs/MarkerArray.h"
+#include "visualization_msgs/msg/marker_array.hpp"
 
 namespace planning {
 
-class EudmPlannerVisualizer {
+class EudmPlannerVisualizer : public rclcpp::Node {
  public:
-  EudmPlannerVisualizer(ros::NodeHandle nh, EudmManager* p_bp_manager,
-                        int ego_id)
-      : nh_(nh), ego_id_(ego_id) {
+  EudmPlannerVisualizer(const rclcpp::NodeOptions &options, EudmManager* p_bp_manager, int ego_id)
+      : Node("eudm_planner_visualizer", options), ego_id_(ego_id) {
     assert(p_bp_manager != nullptr);
     p_bp_manager_ = p_bp_manager;
   }
@@ -33,19 +36,18 @@ class EudmPlannerVisualizer {
                                      std::to_string(ego_id_) +
                                      std::string("/forward_trajs");
 
-    forward_traj_vis_pub_ =
-        nh_.advertise<visualization_msgs::MarkerArray>(forward_traj_topic, 1);
+    forward_traj_vis_pub_ = this->create_publisher<visualization_msgs::msg::MarkerArray>(forward_traj_topic, 1);
   }
 
-  void PublishDataWithStamp(const ros::Time& stamp) {
+  void PublishDataWithStamp(const rclcpp::Time& stamp) {
     VisualizeForwardTrajectories(stamp);
   }
 
-  void VisualizeForwardTrajectories(const ros::Time& stamp) {
+  void VisualizeForwardTrajectories(const rclcpp::Time& stamp) {
     auto forward_trajs = p_bp_manager_->planner().forward_trajs();
     int processed_winner_id = p_bp_manager_->processed_winner_id();
     int original_winner_id = p_bp_manager_->original_winner_id();
-    visualization_msgs::MarkerArray traj_list_marker;
+    visualization_msgs::msg::MarkerArray traj_list_marker;
     common::ColorARGB traj_color(0.5, 0.5, 0.5, 0.5);
     double traj_z = 0.3;
     for (int i = 0; i < static_cast<int>(forward_trajs.size()); ++i) {
@@ -62,19 +64,15 @@ class EudmPlannerVisualizer {
       std::vector<common::Point> points;
       for (const auto& v : forward_trajs[i]) {
         common::Point pt(v.state().vec_position(0), v.state().vec_position(1));
-        // pt.z = v.state().time_stamp -
-        // forward_trajs[i].front().state().time_stamp;
         pt.z = traj_z;
         points.push_back(pt);
-        visualization_msgs::Marker point_marker;
-        // point_marker.ns = "point";
+        visualization_msgs::msg::Marker point_marker;
         common::VisualizationUtil::GetRosMarkerCylinderUsingPoint(
             common::Point(pt), Vec3f(0.5, 0.5, 0.1), traj_color, 0,
             &point_marker);
         traj_list_marker.markers.push_back(point_marker);
       }
-      visualization_msgs::Marker line_marker;
-      // line_marker.ns = "line";
+      visualization_msgs::msg::Marker line_marker;
       common::VisualizationUtil::GetRosMarkerLineStripUsingPoints(
           points, Vec3f(0.1, 0.1, 0.1), traj_color, 0, &line_marker);
       traj_list_marker.markers.push_back(line_marker);
@@ -84,19 +82,18 @@ class EudmPlannerVisualizer {
         stamp, std::string("map"), last_forward_trajs_marker_cnt_,
         &traj_list_marker);
     last_forward_trajs_marker_cnt_ = num_markers;
-    forward_traj_vis_pub_.publish(traj_list_marker);
+    forward_traj_vis_pub_->publish(traj_list_marker);
   }
 
   void set_use_sim_state(bool use_sim_state) { use_sim_state_ = use_sim_state; }
 
  private:
-  ros::NodeHandle nh_;
   int ego_id_;
   bool use_sim_state_ = true;
 
   int last_forward_trajs_marker_cnt_ = 0;
 
-  ros::Publisher forward_traj_vis_pub_;
+  rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr forward_traj_vis_pub_;
 
   EudmManager* p_bp_manager_{nullptr};
 };

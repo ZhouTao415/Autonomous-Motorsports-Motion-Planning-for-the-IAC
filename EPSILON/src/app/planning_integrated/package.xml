@@ -18,6 +18,6 @@
   <depend>ssc_planner</depend>
 
   <export>
-    <!-- Place additional information here for other tools -->
+    <build_type>ament_cmake</build_type>
   </export>
 </package>

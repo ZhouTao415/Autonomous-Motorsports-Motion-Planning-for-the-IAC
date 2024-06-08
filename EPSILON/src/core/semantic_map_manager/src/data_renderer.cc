@@ -259,7 +259,7 @@ ErrorType DataRenderer::GetSurroundingLaneNet(const common::LaneNet &lane_net) {
                                  params);
 
   std::set<size_t> matched_lane_id_set;
-  for (const auto e : ret_matches) {
+  for (const auto &e : ret_matches) {
     matched_lane_id_set.insert(lane_net_pts_.pts[e.first].values[0]);
   }
 

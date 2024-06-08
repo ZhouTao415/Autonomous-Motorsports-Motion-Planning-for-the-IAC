@@ -3,7 +3,7 @@ project(common)
 
 # Enforce C++14 standard
 if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 14)
+  set(CMAKE_CXX_STANDARD 17)
 endif()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_BUILD_TYPE "Release")
@@ -27,7 +27,7 @@ find_package(OpenCV REQUIRED)
 find_package(OOQP REQUIRED)
 
 if(NOT OOQP_FOUND)
-    message(FATAL_error "OOQP not found.")
+    message(FATAL_ERROR "OOQP not found.")
 endif()
 
 # Set directories for third-party and OOQP includes
@@ -61,7 +61,7 @@ add_library(hkust_pl_ooqp_itf
     src/common/solver/ooqp_interface.cc
     src/common/solver/qp_solver.cc
 )
-target_link_libraries(hkust_pl_ooqp_itf
+target_link_libraries(hkust_pl_ooqp_itf 
     ${THIRD_PARTY_LIBRARIES}
 )
 
@@ -87,7 +87,7 @@ set(COMMON_SRC
     src/common/circle_arc/circle_arc_branch.cc
 )
 
-add_library(hkust_pl_common
+add_library(hkust_pl_common 
     ${COMMON_SRC}
 )
 target_link_libraries(hkust_pl_common
@@ -127,11 +127,6 @@ ament_export_include_directories(
     ${PROJECT_SOURCE_DIR}/thirdparty
     ${tf2_ros_INCLUDE_DIRS}
     ${tf2_geometry_msgs_INCLUDE_DIRS}
-)
-
-
-install(TARGETS hkust_pl_common
-  DESTINATION lib/${PROJECT_NAME}
 )
 
 install(DIRECTORY include/

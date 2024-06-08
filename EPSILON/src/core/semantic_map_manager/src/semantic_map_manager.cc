@@ -981,7 +981,7 @@ ErrorType SemanticMapManager::UpdateKeyVehicles() {
   semantic_key_vehicles_.semantic_vehicles.clear();
   key_vehicles_.vehicles.clear();
   {
-    for (const auto v : semantic_surrounding_vehicles_.semantic_vehicles) {
+    for (const auto &v : semantic_surrounding_vehicles_.semantic_vehicles) {
       if (v.second.dist_to_lane > max_distance_to_lane_) {
         continue;
       }

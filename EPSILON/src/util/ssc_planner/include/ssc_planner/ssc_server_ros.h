@@ -1,6 +1,6 @@
 /**
  * @file ssc_server_ros.h
- * @author HKUST Aerial Robotics Group
+ * @author HKUST
  * @brief planner server
  * @version 0.1
  * @date 2019-02
@@ -27,15 +27,15 @@
 #include "ssc_planner/map_adapter.h"
 #include "ssc_planner/ssc_planner.h"
 #include "ssc_planner/ssc_visualizer.h"
-#include "tf/tf.h"
-#include "tf/transform_datatypes.h"
-#include "vehicle_msgs/ControlSignal.h"
+#include "tf2/LinearMath/Transform.h"
+#include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
+#include "vehicle_msgs/msg/control_signal.hpp"
 #include "vehicle_msgs/encoder.h"
-#include "visualization_msgs/Marker.h"
-#include "visualization_msgs/MarkerArray.h"
+#include "visualization_msgs/msg/marker.hpp"
+#include "visualization_msgs/msg/marker_array.hpp"
 
 namespace planning {
-class SscPlannerServer {
+class SscPlannerServer : public rclcpp::Node {
  public:
   using SemanticMapManager = semantic_map_manager::SemanticMapManager;
   using FrenetTrajectory = common::FrenetTrajectory;
@@ -43,9 +43,9 @@ class SscPlannerServer {
     int kInputBufferSize{100};
   };
 
-  SscPlannerServer(ros::NodeHandle nh, int ego_id);
+  SscPlannerServer(const rclcpp::NodeOptions &options, int ego_id);
 
-  SscPlannerServer(ros::NodeHandle nh, double work_rate, int ego_id);
+  SscPlannerServer(const rclcpp::NodeOptions &options, double work_rate, int ego_id);
 
   void PushSemanticMap(const SemanticMapManager &smm);
 
@@ -79,22 +79,19 @@ class SscPlannerServer {
   TicToc time_profile_tool_;
   decimal_t global_init_stamp_{0.0};
 
-  // ros related
-  ros::NodeHandle nh_;
   decimal_t work_rate_ = 20.0;
   int ego_id_;
 
   bool require_intervention_signal_ = false;
-  ros::Publisher ctrl_signal_pub_;
-  ros::Publisher map_marker_pub_;
-  ros::Publisher executing_traj_vis_pub_;
+  rclcpp::Publisher<vehicle_msgs::msg::ControlSignal>::SharedPtr ctrl_signal_pub_;
+  rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr map_marker_pub_;
+  rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr executing_traj_vis_pub_;
 
-  // input buffer
   moodycamel::ReaderWriterQueue<SemanticMapManager> *p_input_smm_buff_;
   SemanticMapManager last_smm_;
-  semantic_map_manager::Visualizer *p_smm_vis_{nullptr};
+  std::unique_ptr<semantic_map_manager::Visualizer> p_smm_vis_;
 
-  SscVisualizer *p_ssc_vis_{nullptr};
+  std::unique_ptr<SscVisualizer> p_ssc_vis_;
   int last_trajmk_cnt_{0};
 
   vec_E<common::State> desired_state_hist_;
@@ -103,4 +100,4 @@ class SscPlannerServer {
 
 }  // namespace planning
 
-#endif  // _UTIL_SSC_PLANNER_INC_SSC_SERVER_ROS_H__
+#endif  // _UTIL_SSC_PLANNER_INC_SSC_SERVER_ROS_H_

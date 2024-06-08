@@ -3,7 +3,7 @@ project(ssc_planner)
 
 # Enforce C++14 standard
 if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 14)
+  set(CMAKE_CXX_STANDARD 17)
 endif()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_BUILD_TYPE "Release")
@@ -21,6 +21,8 @@ find_package(OpenMP REQUIRED)
 find_package(common REQUIRED)
 find_package(semantic_map_manager REQUIRED)
 find_package(Protobuf REQUIRED)
+find_package(vehicle_msgs REQUIRED)
+
 
 # Protobuf generation
 PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS
@@ -34,6 +36,7 @@ include_directories(
     ${common_INCLUDE_DIRS}
     ${semantic_map_manager_INCLUDE_DIRS}
     ${CMAKE_CURRENT_BINARY_DIR}
+    ${vehicle_msgs_INCLUDE_DIRS}
 )
 
 # Define libraries
@@ -69,6 +72,7 @@ ament_export_dependencies(
     semantic_map_manager
     Protobuf
     OpenMP
+    vehicle_msgs
 )
 
 ament_export_include_directories(
@@ -77,6 +81,7 @@ ament_export_include_directories(
     ${common_INCLUDE_DIRS}
     ${semantic_map_manager_INCLUDE_DIRS}
     ${CMAKE_CURRENT_BINARY_DIR}
+    ${vehicle_msgs_INCLUDE_DIRS}
 )
 
 ament_export_libraries(hkust_pl_ssc ssc_server_ros)

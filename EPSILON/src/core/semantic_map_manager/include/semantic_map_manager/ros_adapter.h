@@ -20,8 +20,8 @@ class RosAdapter : public rclcpp::Node {
  public:
   using GridMap2D = common::GridMapND<uint8_t, 2>;
 
-  RosAdapter(rclcpp::NodeOptions options)
-      : Node("ros_adapter", options), p_smm_(nullptr), p_data_renderer_(nullptr) {
+  RosAdapter(rclcpp::NodeOptions options, SemanticMapManager* ptr_smm)
+      : Node("ros_adapter", options), p_data_renderer_(new DataRenderer(ptr_smm)), p_smm_(ptr_smm) {
     Init();
   }
 
@@ -31,9 +31,9 @@ class RosAdapter : public rclcpp::Node {
 
   void BindMapUpdateCallback(std::function<int(const SemanticMapManager&)> fn);
 
- private:
-  void Init();
+  void Init();  // Make Init public
 
+ private:
   void ArenaInfoCallback(const vehicle_msgs::msg::ArenaInfo::SharedPtr msg);
 
   void ArenaInfoStaticCallback(const vehicle_msgs::msg::ArenaInfoStatic::SharedPtr msg);
@@ -50,8 +50,8 @@ class RosAdapter : public rclcpp::Node {
   common::LaneNet lane_net_;
   common::ObstacleSet obstacle_set_;
 
-  SemanticMapManager* p_smm_;
   DataRenderer* p_data_renderer_;
+  SemanticMapManager* p_smm_;
 
   bool get_arena_info_static_ = false;
 

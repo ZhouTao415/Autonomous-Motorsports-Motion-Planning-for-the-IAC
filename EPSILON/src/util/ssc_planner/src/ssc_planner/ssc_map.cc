@@ -643,7 +643,7 @@ bool SscMap::CheckIfCubeContainsSeed(
 ErrorType SscMap::GetFinalGlobalMetricCubesList() {
   final_corridor_vec_.clear();
   if_corridor_valid_.clear();
-  for (const auto corridor : driving_corridor_vec_) {
+  for (const auto &corridor : driving_corridor_vec_) {
     vec_E<common::SpatioTemporalSemanticCubeNd<2>> cubes;
     if (!corridor.is_valid) {
       if_corridor_valid_.push_back(0);
@@ -739,7 +739,7 @@ ErrorType SscMap::FillMapWithFsVehicleTraj(
   }
   for (int i = 0; i < static_cast<int>(traj.size()); ++i) {
     bool is_valid = true;
-    for (const auto v : traj[i].vertices) {
+    for (const auto &v : traj[i].vertices) {
       if (v(0) <= 0) {
         is_valid = false;
         break;
@@ -752,7 +752,7 @@ ErrorType SscMap::FillMapWithFsVehicleTraj(
     int t_idx = 0;
     std::vector<common::Point2i> v_coord;
     std::array<decimal_t, 3> p_w;
-    for (const auto v : traj[i].vertices) {
+    for (const auto &v : traj[i].vertices) {
       p_w = {v(0), v(1), z};
       auto coord = p_3d_grid_->GetCoordUsingGlobalPosition(p_w);
       t_idx = coord[2];

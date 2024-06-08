@@ -3,7 +3,7 @@ project(route_planner)
 
 # Enforce C++14 standard
 if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 14)
+  set(CMAKE_CXX_STANDARD 17)
 endif()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_BUILD_TYPE "Release")
@@ -27,7 +27,7 @@ include_directories(
 )
 
 # Define library
-add_library(hkust_pl_rp SHARED
+add_library(hkust_pl_rp 
     src/route_planner/route_planner.cc
 )
 

@@ -1,6 +1,7 @@
 #ifndef _CORE_EUDM_PLANNER_INC_EUDM_SERVER_ROS_H__
 #define _CORE_EUDM_PLANNER_INC_EUDM_SERVER_ROS_H__
-#include <sensor_msgs/Joy.h>
+
+#include <sensor_msgs/msg/joy.hpp>
 
 #include <chrono>
 #include <functional>
@@ -19,14 +20,14 @@
 #include "moodycamel/readerwriterqueue.h"
 #include <rclcpp/rclcpp.hpp>
 #include "semantic_map_manager/semantic_map_manager.h"
-#include "tf/tf.h"
-#include "tf/transform_datatypes.h"
+#include "tf2/LinearMath/Transform.h"
+#include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
 #include "vehicle_msgs/encoder.h"
-#include "visualization_msgs/Marker.h"
-#include "visualization_msgs/MarkerArray.h"
+#include "visualization_msgs/msg/marker.hpp"
+#include "visualization_msgs/msg/marker_array.hpp"
 
 namespace planning {
-class EudmPlannerServer {
+class EudmPlannerServer : public rclcpp::Node {
  public:
   using SemanticMapManager = semantic_map_manager::SemanticMapManager;
   using DcpAction = DcpTree::DcpAction;
@@ -37,17 +38,15 @@ class EudmPlannerServer {
     int kInputBufferSize{100};
   };
 
-  EudmPlannerServer(ros::NodeHandle nh, int ego_id);
+  EudmPlannerServer(const rclcpp::NodeOptions &options, int ego_id);
 
-  EudmPlannerServer(ros::NodeHandle nh, double work_rate, int ego_id);
+  EudmPlannerServer(const rclcpp::NodeOptions &options, double work_rate, int ego_id);
 
   void PushSemanticMap(const SemanticMapManager &smm);
 
   void BindBehaviorUpdateCallback(
       std::function<int(const SemanticMapManager &)> fn);
-  /**
-   * @brief set desired velocity
-   */
+
   void set_user_desired_velocity(const decimal_t desired_vel);
 
   decimal_t user_desired_velocity() const;
@@ -57,9 +56,12 @@ class EudmPlannerServer {
   void Start();
 
  private:
+  rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr joy_sub_; 
+
   void PlanCycleCallback();
 
-  void JoyCallback(const sensor_msgs::Joy::ConstPtr &msg);
+  void JoyCallback(const sensor_msgs::msg::Joy::ConstSharedPtr msg);
+  
 
   void Replan();
 
@@ -80,9 +82,6 @@ class EudmPlannerServer {
 
   planning::eudm::Task task_;
   bool use_sim_state_ = true;
-  // ros related
-  ros::NodeHandle nh_;
-  ros::Subscriber joy_sub_;
 
   double work_rate_{20.0};
   int ego_id_;

@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.5)
 project(behavior_planner)
 
-# Enforce C++14 standard
+# Enforce C++17 standard
 if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 14)
+  set(CMAKE_CXX_STANDARD 17)
 endif()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_BUILD_TYPE "Release")
@@ -21,6 +21,7 @@ find_package(vehicle_model REQUIRED)
 find_package(semantic_map_manager REQUIRED)
 find_package(forward_simulator REQUIRED)
 find_package(route_planner REQUIRED)
+find_package(rmw REQUIRED) 
 
 # Include directories
 include_directories(
@@ -30,6 +31,8 @@ include_directories(
   ${semantic_map_manager_INCLUDE_DIRS}
   ${forward_simulator_INCLUDE_DIRS}
   ${route_planner_INCLUDE_DIRS}
+  ${rclcpp_INCLUDE_DIRS} 
+  ${rmw_INCLUDE_DIRS} 
 )
 
 # Define libraries

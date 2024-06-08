@@ -12,6 +12,7 @@
   <depend>rclpy</depend>
   <depend>common</depend>
   <depend>semantic_map_manager</depend>
+  <depend>vehicle_msgs</depend>
 
   <!-- Export tags can include additional information needed for other tools -->
   <export>

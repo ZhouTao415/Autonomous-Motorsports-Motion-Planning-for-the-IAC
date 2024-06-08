@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.5)
 project(phy_simulator)
 
-# Enforce C++14 standard
+# Enforce C++17 standard
 if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 14)
+  set(CMAKE_CXX_STANDARD 17)
 endif()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_BUILD_TYPE "Release")
@@ -20,6 +20,7 @@ find_package(common REQUIRED)
 find_package(vehicle_model REQUIRED)
 find_package(vehicle_msgs REQUIRED)
 
+
 # Include directories
 include_directories(
     include
@@ -32,13 +33,17 @@ include_directories(
 )
 
 # Define library
-add_library(phy_simulator_lib SHARED
+add_library(phy_simulator_lib
     src/phy_simulator/arena_loader.cc
     src/phy_simulator/phy_simulator.cc
 )
+
 target_link_libraries(phy_simulator_lib
-    hkust_pl_vehicle_model
-    hkust_pl_common
+    # hkust_pl_vehicle_model
+    # hkust_pl_common
+    dw
+    ${common_LIBRARIES}
+    ${vehicle_model_LIBRARIES}
 )
 
 # Define executable
@@ -47,9 +52,26 @@ add_executable(phy_simulator_planning_node
     src/phy_simulator/visualizer.cc
     src/phy_simulator/ros_adapter.cc
 )
+
 target_link_libraries(phy_simulator_planning_node
     phy_simulator_lib
-    ${rclcpp_LIBRARIES}
+    dw
+    ${common_LIBRARIES}
+    ${vehicle_model_LIBRARIES}
+    ${vehicle_msgs_LIBRARIES}
+)
+
+# Install the targets
+install(TARGETS phy_simulator_lib phy_simulator_planning_node
+  EXPORT export_phy_simulator
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
+  INCLUDES DESTINATION include
+)
+
+install(DIRECTORY include/
+  DESTINATION include
 )
 
 # Exporting and installation setups
@@ -72,18 +94,6 @@ ament_export_include_directories(
     ${vehicle_model_INCLUDE_DIRS}
     ${vehicle_msgs_INCLUDE_DIRS}
     ${EIGEN3_INCLUDE_DIRS}
-)
-
-# Install the targets
-install(TARGETS phy_simulator_lib phy_simulator_planning_node
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
-  RUNTIME DESTINATION bin
-  INCLUDES DESTINATION include
-)
-
-install(DIRECTORY include/
-  DESTINATION include
 )
 
 ament_package()

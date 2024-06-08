@@ -3,7 +3,7 @@ project(vehicle_model)
 
 # Enforce C++14 standard
 if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 14)
+  set(CMAKE_CXX_STANDARD 17)
 endif()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_BUILD_TYPE "Release")
@@ -43,6 +43,7 @@ add_library(hkust_pl_vehicle_model
     src/vehicle_model/controllers/ctx_idm_velocity_controller.cc
 )
 
+
 target_link_libraries(hkust_pl_vehicle_model
     hkust_pl_common
     ${Boost_LIBRARIES}
@@ -79,11 +80,6 @@ ament_target_dependencies(hkust_pl_vehicle_model
     Boost
 )
 
-
-
-install(TARGETS hkust_pl_vehicle_model
-  DESTINATION lib/${PROJECT_NAME}
-)
 
 install(DIRECTORY include/
   DESTINATION include

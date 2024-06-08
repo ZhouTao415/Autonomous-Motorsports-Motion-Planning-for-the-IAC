@@ -3,12 +3,13 @@ project(eudm_planner)
 
 # Enforce C++14 standard
 if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 14)
+  set(CMAKE_CXX_STANDARD 17)
 endif()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_BUILD_TYPE "Release")
 add_compile_options(-O3 -Wall)
 
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 # Find dependencies
 find_package(ament_cmake REQUIRED)
@@ -16,14 +17,13 @@ find_package(rclcpp REQUIRED)
 find_package(visualization_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(Protobuf REQUIRED)
-
-set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
-
 find_package(common REQUIRED)
 find_package(vehicle_model REQUIRED)
 find_package(semantic_map_manager REQUIRED)
 find_package(forward_simulator REQUIRED)
 find_package(route_planner REQUIRED)
+find_package(vehicle_msgs REQUIRED)
+
 
 # Protobuf generation
 set(PROTO_FILES
@@ -41,6 +41,7 @@ include_directories(
     ${vehicle_model_INCLUDE_DIRS}
     ${forward_simulator_INCLUDE_DIRS}
     ${CMAKE_CURRENT_BINARY_DIR}
+    ${vehicle_msgs_INCLUDE_DIRS}
 )
 
 # Define libraries
@@ -76,6 +77,7 @@ ament_export_dependencies(
     semantic_map_manager
     forward_simulator
     route_planner
+    vehicle_msgs
 )
 
 ament_export_include_directories(
@@ -87,6 +89,7 @@ ament_export_include_directories(
     ${vehicle_model_INCLUDE_DIRS}
     ${forward_simulator_INCLUDE_DIRS}
     ${CMAKE_CURRENT_BINARY_DIR}
+    ${vehicle_msgs_INCLUDE_DIRS}
 )
 
 # Install the targets
