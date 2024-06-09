@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 project(common)
 
-# Enforce C++14 standard
+# Enforce C++17 standard
 if(NOT CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 17)
 endif()
@@ -32,7 +32,7 @@ endif()
 
 # Set directories for third-party and OOQP includes
 set(THIRD_PARTY_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/thirdparty ${PROTOBUF_INCLUDE_DIR})
-set(OOQP_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/thirdparty/ooqp/include/ooqp)
+set(OOQP_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/thirdparty/OOQP/include)
 
 # Include directories for project and dependencies
 include_directories(
@@ -48,6 +48,8 @@ include_directories(
 )
 
 # Link directories for third-party libraries
+link_directories(${OOQP_LIBRARY_DIRS})
+
 set(THIRD_PARTY_LIBRARIES
     dw
     ${GLOG_LIBRARIES}
@@ -63,6 +65,10 @@ add_library(hkust_pl_ooqp_itf
 )
 target_link_libraries(hkust_pl_ooqp_itf 
     ${THIRD_PARTY_LIBRARIES}
+    ooqpgensparse
+    ooqpsparse 
+    ooqpgondzio 
+    ooqpbase blas ma27 gfortran 
 )
 
 # Define the hkust_pl_common library with all common source files
@@ -129,16 +135,25 @@ ament_export_include_directories(
     ${tf2_geometry_msgs_INCLUDE_DIRS}
 )
 
-install(DIRECTORY include/
-  DESTINATION include
+install(DIRECTORY include/${PROJECT_NAME}/
+  DESTINATION include/${PROJECT_NAME}
+  FILES_MATCHING PATTERN "*.h"
+  PATTERN ".svn" EXCLUDE
 )
 
+# Define export sets for the targets
 install(TARGETS hkust_pl_common hkust_pl_ooqp_itf
-  EXPORT export_hkust_pl_common
+  EXPORT hkust_pl_export
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
   INCLUDES DESTINATION include
+)
+
+# Install the export set
+install(EXPORT hkust_pl_export
+  FILE hkust_pl_export.cmake
+  DESTINATION share/${PROJECT_NAME}/cmake
 )
 
 ament_package()

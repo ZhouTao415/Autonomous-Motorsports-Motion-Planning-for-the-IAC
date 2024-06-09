@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 project(ssc_planner)
 
-# Enforce C++14 standard
+# Enforce C++17 standard
 if(NOT CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 17)
 endif()
@@ -22,7 +22,7 @@ find_package(common REQUIRED)
 find_package(semantic_map_manager REQUIRED)
 find_package(Protobuf REQUIRED)
 find_package(vehicle_msgs REQUIRED)
-
+find_package(Glog REQUIRED)  # Add this line
 
 # Protobuf generation
 PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS
@@ -37,6 +37,8 @@ include_directories(
     ${semantic_map_manager_INCLUDE_DIRS}
     ${CMAKE_CURRENT_BINARY_DIR}
     ${vehicle_msgs_INCLUDE_DIRS}
+    ${Protobuf_INCLUDE_DIRS}
+    ${GLOG_INCLUDE_DIRS}  # Add this line
 )
 
 # Define libraries
@@ -46,21 +48,22 @@ add_library(hkust_pl_ssc
     src/ssc_planner/map_adapter.cc
     ${PROTO_SRCS}
 )
-target_link_libraries(hkust_pl_ssc PRIVATE
+target_link_libraries(hkust_pl_ssc
     hkust_pl_common
     hkust_pl_smm
-    "${OpenMP_CXX_FLAGS}"
+    OpenMP::OpenMP_CXX
+    ${Protobuf_LIBRARIES}
+    glog::glog  # Correctly link glog
 )
-target_compile_options(hkust_pl_ssc PRIVATE "${OpenMP_CXX_FLAGS}")
 
 add_library(ssc_server_ros
     src/ssc_planner/ssc_server_ros.cc
     src/ssc_planner/ssc_visualizer.cc
 )
-target_link_libraries(ssc_server_ros PRIVATE
+target_link_libraries(ssc_server_ros
     hkust_pl_ssc
     hkust_smm_ros
-    "${OpenMP_CXX_FLAGS}"
+    OpenMP::OpenMP_CXX
 )
 
 # Exporting and installation setups
@@ -73,6 +76,7 @@ ament_export_dependencies(
     Protobuf
     OpenMP
     vehicle_msgs
+    glog  # Add glog to the dependencies
 )
 
 ament_export_include_directories(

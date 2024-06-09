@@ -21,7 +21,6 @@ find_package(vehicle_model REQUIRED)
 find_package(semantic_map_manager REQUIRED)
 find_package(forward_simulator REQUIRED)
 find_package(route_planner REQUIRED)
-find_package(rmw REQUIRED) 
 
 # Include directories
 include_directories(
@@ -31,8 +30,7 @@ include_directories(
   ${semantic_map_manager_INCLUDE_DIRS}
   ${forward_simulator_INCLUDE_DIRS}
   ${route_planner_INCLUDE_DIRS}
-  ${rclcpp_INCLUDE_DIRS} 
-  ${rmw_INCLUDE_DIRS} 
+  ${rclcpp_INCLUDE_DIRS}
 )
 
 # Define libraries
@@ -46,7 +44,7 @@ target_link_libraries(behavior_planner_lib
     hkust_pl_rp
     hkust_pl_smm
     hkust_pl_vehicle_model
-    )
+)
 
 add_library(behavior_planner_ros 
     src/behavior_planner/behavior_server_ros.cc
@@ -80,14 +78,6 @@ ament_export_include_directories(
     ${route_planner_INCLUDE_DIRS}
 )
 
-# install(TARGETS behavior_planner_lib behavior_planner_ros
-#   DESTINATION lib/${PROJECT_NAME}
-# )
-
-install(DIRECTORY include/
-  DESTINATION include
-)
-
 # Install the targets
 install(TARGETS behavior_planner_lib behavior_planner_ros
   LIBRARY DESTINATION lib
@@ -96,5 +86,8 @@ install(TARGETS behavior_planner_lib behavior_planner_ros
   INCLUDES DESTINATION include
 )
 
+install(DIRECTORY include/
+  DESTINATION include
+)
 
 ament_package()

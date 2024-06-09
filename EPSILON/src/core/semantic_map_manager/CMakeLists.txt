@@ -48,11 +48,14 @@ add_library(hkust_pl_smm
     src/config_loader.cc
     src/traffic_signal_manager.cc
 )
-target_link_libraries(hkust_pl_smm
-    ${vehicle_model_LIBRARIES}
-    ${common_LIBRARIES}
-    ${motion_predictor_LIBRARIES}
-    ${OpenCV_LIBS}
+ament_target_dependencies(hkust_pl_smm
+    rclcpp
+    vehicle_msgs
+    vehicle_model
+    common
+    motion_predictor
+    Eigen3
+    OpenCV
 )
 
 # Define the hkust_smm_ros library
@@ -60,12 +63,23 @@ add_library(hkust_smm_ros
     src/ros_adapter.cc
     src/visualizer.cc
 )
+ament_target_dependencies(hkust_smm_ros
+    rclcpp
+    tf2
+    tf2_ros
+    tf2_geometry_msgs
+    visualization_msgs
+    sensor_msgs
+    geometry_msgs
+    Eigen3
+    OpenCV
+    common
+    motion_predictor
+    vehicle_msgs
+    vehicle_model
+)
 target_link_libraries(hkust_smm_ros
     hkust_pl_smm
-    ${rclcpp_LIBRARIES}
-    ${tf2_LIBRARIES}
-    ${tf2_ros_LIBRARIES}
-    ${tf2_geometry_msgs_LIBRARIES}
 )
 
 # Exporting and installation setups

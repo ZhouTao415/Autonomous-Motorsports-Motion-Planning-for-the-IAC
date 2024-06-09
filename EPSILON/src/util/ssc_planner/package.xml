@@ -13,6 +13,10 @@
   <depend>common</depend>
   <depend>semantic_map_manager</depend>
   <depend>vehicle_msgs</depend>
+  <depend>protobuf</depend>
+  <depend>glog</depend> <!-- Add this line -->
+
+  <build_depend>rosidl_default_runtime</build_depend>
 
   <!-- Export tags can include additional information needed for other tools -->
   <export>

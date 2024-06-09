@@ -2,10 +2,6 @@
 #define _CORE_BEHAVIOR_PLANNER_INC_BEHAVIOR_SERVER_ROS_H__
 
 #include <rclcpp/rclcpp.hpp>
-#include <sensor_msgs/msg/joy.hpp>
-#include <visualization_msgs/msg/marker.hpp>
-#include <visualization_msgs/msg/marker_array.hpp>
-
 #include <chrono>
 #include <functional>
 #include <numeric>
@@ -21,7 +17,15 @@
 #include "moodycamel/atomicops.h"
 #include "moodycamel/readerwriterqueue.h"
 
+#include <sensor_msgs/msg/joy.hpp>
+#include "tf2/LinearMath/Transform.h"
+#include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
+#include "vehicle_msgs/encoder.h"
+#include "visualization_msgs/msg/marker.hpp"
+#include "visualization_msgs/msg/marker_array.hpp"
+
 namespace planning {
+
 class BehaviorPlannerServer : public rclcpp::Node {
  public:
   using SemanticMapManager = semantic_map_manager::SemanticMapManager;
@@ -30,23 +34,30 @@ class BehaviorPlannerServer : public rclcpp::Node {
     int kInputBufferSize{100};
   };
 
-  BehaviorPlannerServer(const std::shared_ptr<rclcpp::Node>& node, int ego_id);
-  BehaviorPlannerServer(const std::shared_ptr<rclcpp::Node>& node, double work_rate, int ego_id);
+  BehaviorPlannerServer(const rclcpp::NodeOptions &options, int ego_id);
+
+  BehaviorPlannerServer(const rclcpp::NodeOptions &options, double work_rate, int ego_id);
 
   void PushSemanticMap(const SemanticMapManager &smm);
 
   void BindBehaviorUpdateCallback(
       std::function<int(const SemanticMapManager &)> fn);
 
+  /**
+   * @brief set the level of autonomous driving
+   */
   void set_autonomous_level(int level);
 
-  void set_user_desired_velocity(const decimal_t desired_vel);
+  /**
+   * @brief set desired velocity
+   */
+  void set_user_desired_velocity(const double desired_vel);
 
   void set_aggressive_level(int level);
 
-  decimal_t user_desired_velocity() const;
+  double user_desired_velocity() const;
 
-  decimal_t reference_desired_velocity() const;
+  double reference_desired_velocity() const;
 
   void enable_hmi_interface();
 
@@ -57,7 +68,7 @@ class BehaviorPlannerServer : public rclcpp::Node {
  private:
   void PlanCycleCallback();
 
-  void JoyCallback(const sensor_msgs::msg::Joy::ConstSharedPtr msg);
+  void JoyCallback(const sensor_msgs::msg::Joy::ConstSharedPtr &msg);
 
   void Replan();
 
@@ -72,7 +83,7 @@ class BehaviorPlannerServer : public rclcpp::Node {
   BehaviorPlannerVisualizer *p_visualizer_;
 
   TicToc time_profile_tool_;
-  decimal_t global_init_stamp_{0.0};
+  double global_init_stamp_{0.0};
 
   // ros related
   rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr joy_sub_;

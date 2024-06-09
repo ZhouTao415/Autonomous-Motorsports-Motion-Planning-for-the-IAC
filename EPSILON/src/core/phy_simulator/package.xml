@@ -15,6 +15,7 @@
   <depend>vehicle_msgs</depend>
   <depend>common</depend>
   <depend>vehicle_model</depend>
+  <exec_depend>ros2launch</exec_depend>
 
   <!-- Export dependencies -->
   <export>

@@ -163,7 +163,8 @@ int main(int argc, char** argv) {
   semantic_map_manager::RosAdapter smm_ros_adapter{rclcpp::NodeOptions(), &semantic_map_manager};
   p_smm_vis_ = std::make_shared<semantic_map_manager::Visualizer>(rclcpp::NodeOptions(), ego_id);
 
-  p_bp_server_ = std::make_shared<planning::BehaviorPlannerServer>(node, bp_work_rate, ego_id);
+  // Pass rclcpp::NodeOptions() instead of node to the BehaviorPlannerServer constructor
+  p_bp_server_ = std::make_shared<planning::BehaviorPlannerServer>(rclcpp::NodeOptions(), bp_work_rate, ego_id);
   p_bp_server_->set_user_desired_velocity(desired_vel);
   p_bp_server_->set_autonomous_level(autonomous_level);
   p_bp_server_->set_aggressive_level(aggressiveness_level);
@@ -188,4 +189,3 @@ int main(int argc, char** argv) {
   rclcpp::shutdown();
   return 0;
 }
-

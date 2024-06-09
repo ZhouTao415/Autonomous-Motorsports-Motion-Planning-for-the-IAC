@@ -1,5 +1,5 @@
 /**
- * @file ssc_server.cc
+ * @file ssc_server_ros.cc
  * @brief implementation for ssc planner server
  * @version 0.1
  * @date 2019-02

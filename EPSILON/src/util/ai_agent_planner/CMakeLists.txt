@@ -23,6 +23,9 @@ find_package(forward_simulator REQUIRED)
 find_package(semantic_map_manager REQUIRED)
 find_package(behavior_planner REQUIRED)
 
+install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
+
+
 # Include directories for project and dependencies
 include_directories(
     ${rclcpp_INCLUDE_DIRS}
@@ -46,11 +49,21 @@ include_directories(
 add_executable(onlane_ai_agent
     src/onlane_ai_agent.cc
 )
+
+# Link libraries
 target_link_libraries(onlane_ai_agent
-    ${catkin_LIBRARIES}
-    hkust_smm_ros
-    behavior_planner_ros
-    hkust_pl_vehicle_model
+    dw
+    ${rclcpp_LIBRARIES}
+    ${common_LIBRARIES}
+    ${semantic_map_manager_LIBRARIES}
+    ${vehicle_model_LIBRARIES}
+    ${forward_simulator_LIBRARIES}
+    ${behavior_planner_LIBRARIES}
+    ${vehicle_msgs_LIBRARIES}
+    ooqpgensparse
+    ooqpsparse 
+    ooqpgondzio 
+    ooqpbase blas ma27 gfortran 
 )
 
 ament_package()

@@ -14,6 +14,8 @@
   <depend>behavior_planner</depend>
   <depend>semantic_map_manager</depend>
   <depend>forward_simulator</depend>
+  <exec_depend>ros2launch</exec_depend>
+
 
   <!-- Export tags can include additional information needed for other tools -->
   <export>

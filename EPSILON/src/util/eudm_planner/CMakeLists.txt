@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 project(eudm_planner)
 
-# Enforce C++14 standard
+# Enforce C++17 standard
 if(NOT CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 17)
 endif()
@@ -23,13 +23,12 @@ find_package(semantic_map_manager REQUIRED)
 find_package(forward_simulator REQUIRED)
 find_package(route_planner REQUIRED)
 find_package(vehicle_msgs REQUIRED)
-
+find_package(Glog REQUIRED)  # Add this line
 
 # Protobuf generation
-set(PROTO_FILES
-  proto/eudm_config.proto
+PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS 
+    proto/eudm_config.proto 
 )
-PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
 
 # Include directories
 include_directories(
@@ -42,6 +41,8 @@ include_directories(
     ${forward_simulator_INCLUDE_DIRS}
     ${CMAKE_CURRENT_BINARY_DIR}
     ${vehicle_msgs_INCLUDE_DIRS}
+    ${Protobuf_INCLUDE_DIRS}
+    ${GLOG_INCLUDE_DIRS}  # Add this line
 )
 
 # Define libraries
@@ -54,6 +55,8 @@ add_library(hkust_pl_eudm
 )
 target_link_libraries(hkust_pl_eudm
     hkust_pl_smm
+    ${Protobuf_LIBRARIES}
+    glog::glog  # Add this line
 )
 
 add_library(hkust_eudm_ros
@@ -62,6 +65,8 @@ add_library(hkust_eudm_ros
 target_link_libraries(hkust_eudm_ros
     hkust_pl_eudm
     hkust_smm_ros
+    ${Protobuf_LIBRARIES}
+    glog::glog  # Add this line
 )
 
 ament_export_libraries(hkust_pl_eudm hkust_eudm_ros)
@@ -78,6 +83,7 @@ ament_export_dependencies(
     forward_simulator
     route_planner
     vehicle_msgs
+    glog  # Add this line
 )
 
 ament_export_include_directories(
@@ -100,7 +106,7 @@ install(TARGETS hkust_pl_eudm hkust_eudm_ros
   INCLUDES DESTINATION include
 )
 
-# Install include directories
+# Install include directory
 install(DIRECTORY include/
   DESTINATION include
 )

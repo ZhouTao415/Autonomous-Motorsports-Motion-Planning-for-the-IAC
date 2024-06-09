@@ -1,10 +1,8 @@
 /**
  * @file test_ssc_with_mpdm.cc
- * @author HKUST Aerial Robotics Group
  * @brief
  * @version 0.1
  * @date 2020-09-21
- * @copyright Copyright (c) 2020
  */
 
 #include <chrono>
@@ -39,6 +37,7 @@ int SemanticMapUpdateCallback(const semantic_map_manager::SemanticMapManager& sm
 int main(int argc, char** argv) {
   rclcpp::init(argc, argv);
   auto node = rclcpp::Node::make_shared("planning_integrated");
+  auto options = rclcpp::NodeOptions();
 
   int ego_id;
   if (!node->get_parameter("ego_id", ego_id)) {
@@ -59,20 +58,21 @@ int main(int argc, char** argv) {
   }
 
   semantic_map_manager::SemanticMapManager semantic_map_manager(ego_id, agent_config_path);
-  semantic_map_manager::RosAdapter smm_ros_adapter(rclcpp::NodeOptions(), &semantic_map_manager);
+  semantic_map_manager::RosAdapter smm_ros_adapter(options, &semantic_map_manager);
   smm_ros_adapter.BindMapUpdateCallback(SemanticMapUpdateCallback);
 
-  double desired_vel;
+  double desired_vel = 6.0;
+  node->declare_parameter("desired_vel", desired_vel);
   node->get_parameter("desired_vel", desired_vel);
 
   // Declare bp
-  p_bp_server_ = std::make_shared<planning::BehaviorPlannerServer>(rclcpp::NodeOptions(), bp_work_rate, ego_id);
+  p_bp_server_ = std::make_shared<planning::BehaviorPlannerServer>(options, bp_work_rate, ego_id);
   p_bp_server_->set_user_desired_velocity(desired_vel);
   p_bp_server_->BindBehaviorUpdateCallback(BehaviorUpdateCallback);
   p_bp_server_->set_autonomous_level(3);
   p_bp_server_->enable_hmi_interface();
 
-  p_ssc_server_ = std::make_shared<planning::SscPlannerServer>(rclcpp::NodeOptions(), ssc_planner_work_rate, ego_id);
+  p_ssc_server_ = std::make_shared<planning::SscPlannerServer>(options, ssc_planner_work_rate, ego_id);
 
   p_ssc_server_->Init(ssc_config_path);
   p_bp_server_->Init();

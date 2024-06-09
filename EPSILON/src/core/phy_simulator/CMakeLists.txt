@@ -20,6 +20,8 @@ find_package(common REQUIRED)
 find_package(vehicle_model REQUIRED)
 find_package(vehicle_msgs REQUIRED)
 
+install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
+
 
 # Include directories
 include_directories(

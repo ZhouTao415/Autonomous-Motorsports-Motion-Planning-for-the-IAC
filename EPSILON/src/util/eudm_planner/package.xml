@@ -10,10 +10,17 @@
   <buildtool_depend>ament_cmake</buildtool_depend>
   <depend>rclcpp</depend>
   <depend>rclpy</depend>
+  <depend>sensor_msgs</depend>
   <depend>common</depend>
+  <depend>vehicle_model</depend>
   <depend>semantic_map_manager</depend>
+  <depend>forward_simulator</depend>
   <depend>route_planner</depend>
   <depend>vehicle_msgs</depend>
+  <depend>protobuf</depend>
+  <depend>glog</depend> <!-- Add this line -->
+
+  <build_depend>rosidl_default_runtime</build_depend>
 
   <!-- Export tags can include additional information needed for other tools -->
   <export>

@@ -21,7 +21,7 @@
 #include "common/visualization/common_visualization_util.h"
 #include "moodycamel/atomicops.h"
 #include "moodycamel/readerwriterqueue.h"
-#include <rclcpp/rclcpp.hpp>
+#include "rclcpp/rclcpp.hpp"
 #include "semantic_map_manager/semantic_map_manager.h"
 #include "semantic_map_manager/visualizer.h"
 #include "ssc_planner/map_adapter.h"
