@@ -55,7 +55,7 @@ void NavGoalCallback(const geometry_msgs::msg::PoseStamped::SharedPtr msg) {
 int main(int argc, char** argv) {
   // 使用了 "~" 作为匿名名称，这意味着每次启动节点时都会生成一个唯一的名称
   rclcpp::init(argc, argv);
-  auto nh = std::make_shared<rclcpp::Node>("~");
+  auto nh = std::make_shared<rclcpp::Node>("phy_simulator_planning_node");
 
   std::string vehicle_info_path;
   if (!nh->get_parameter("vehicle_info_path", vehicle_info_path)) {

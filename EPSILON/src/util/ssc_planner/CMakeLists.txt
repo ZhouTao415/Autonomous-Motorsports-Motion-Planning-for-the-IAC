@@ -29,6 +29,9 @@ PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS
     proto/ssc_config.proto
 )
 
+install(DIRECTORY config DESTINATION share/${PROJECT_NAME})
+
+
 # Include directories
 include_directories(
     include

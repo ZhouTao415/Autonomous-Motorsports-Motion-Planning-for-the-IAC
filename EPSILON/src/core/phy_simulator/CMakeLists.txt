@@ -20,9 +20,6 @@ find_package(common REQUIRED)
 find_package(vehicle_model REQUIRED)
 find_package(vehicle_msgs REQUIRED)
 
-install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
-
-
 # Include directories
 include_directories(
     include
@@ -68,12 +65,16 @@ install(TARGETS phy_simulator_lib phy_simulator_planning_node
   EXPORT export_phy_simulator
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
-  RUNTIME DESTINATION bin
+  RUNTIME DESTINATION lib/${PROJECT_NAME}
   INCLUDES DESTINATION include
 )
 
 install(DIRECTORY include/
   DESTINATION include
+)
+
+install(DIRECTORY launch
+  DESTINATION share/${PROJECT_NAME}
 )
 
 # Exporting and installation setups

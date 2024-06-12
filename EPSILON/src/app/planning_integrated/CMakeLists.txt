@@ -123,15 +123,15 @@ ament_export_include_directories(
 )
 
 # Install the targets
-install(TARGETS test_ssc_with_mpdm test_ssc_with_eudm
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
-  RUNTIME DESTINATION bin
-  INCLUDES DESTINATION include
-)
-
-# install(DIRECTORY include/
-#   DESTINATION include
+# install(TARGETS test_ssc_with_mpdm test_ssc_with_eudm
+#   LIBRARY DESTINATION lib
+#   ARCHIVE DESTINATION lib
+#   RUNTIME DESTINATION bin
+#   INCLUDES DESTINATION include
 # )
+
+install(TARGETS test_ssc_with_mpdm test_ssc_with_eudm
+  DESTINATION lib/${PROJECT_NAME}
+)
 
 ament_package()
