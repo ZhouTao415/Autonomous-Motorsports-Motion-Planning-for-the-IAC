@@ -1,29 +1,8 @@
 from launch import LaunchDescription
 from launch_ros.actions import Node
-# 封装终端指令相关类--------------
-# from launch.actions import ExecuteProcess
-# from launch.substitutions import FindExecutable
-# 参数声明与获取-----------------
-from launch.actions import DeclareLaunchArgument
-from launch.substitutions import LaunchConfiguration
-# 文件包含相关-------------------
-from launch.actions import IncludeLaunchDescription
-from launch.launch_description_sources import PythonLaunchDescriptionSource
-# 分组相关----------------------
-# from launch_ros.actions import PushRosNamespace
-# from launch.actions import GroupAction
-# 事件相关----------------------
-# from launch.event_handlers import OnProcessStart, OnProcessExit
-# from launch.actions import ExecuteProcess, RegisterEventHandler,LogInfo
-from launch.actions import LogInfo
-# 获取功能包下share目录路径-------
+from launch.actions import DeclareLaunchArgument, LogInfo
 from ament_index_python.packages import get_package_share_directory
-
-from launch.substitutions import PathJoinSubstitution, TextSubstitution
-from launch_ros.substitutions import FindPackageShare
-
-
-
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 
 def generate_launch_description():
    # args that can be set from the command line or a default will be used
@@ -47,8 +26,7 @@ def generate_launch_description():
        package='planning_integrated',
        executable='test_ssc_with_eudm',
        name='test_ssc_with_eudm_0',
-       output = 'screen',
-       
+       output = 'screen',  
        parameters=[{
            'ego_id': 0,
            'desired_vel': 20.0,
@@ -82,6 +60,11 @@ def generate_launch_description():
        arena_info_dynamic_topic,
        ctrl_topic,
        playground,
+       LogInfo(msg=['arena_info_static_topic: ', LaunchConfiguration('arena_info_static_topic')]),
+       LogInfo(msg=['arena_info_dynamic_topic: ', LaunchConfiguration('arena_info_dynamic_topic')]),
+       LogInfo(msg=['ctrl_topic: ', LaunchConfiguration('ctrl_topic')]),
+       LogInfo(msg=['playground: ', LaunchConfiguration('playground')]),
+       LogInfo(msg="Launching node..."),
        node
    ])
 

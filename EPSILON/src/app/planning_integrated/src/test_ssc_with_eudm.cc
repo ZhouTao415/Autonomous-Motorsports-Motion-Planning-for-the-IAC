@@ -32,28 +32,38 @@ int main(int argc, char** argv) {
   auto node = rclcpp::Node::make_shared("planning_integrated");
   auto options = rclcpp::NodeOptions();
 
+  node->declare_parameter<int>("ego_id", 0);
+  node->declare_parameter<std::string>("agent_config_path", "");
+  node->declare_parameter<std::string>("bp_config_path", "");
+  node->declare_parameter<std::string>("ssc_config_path", "");
+  node->declare_parameter<double>("desired_vel", 6.0);
+  node->declare_parameter<bool>("use_sim_state", true);
+
   int ego_id;
   if (!node->get_parameter("ego_id", ego_id)) {
-    RCLCPP_ERROR(node->get_logger(), "Failed to get param ego_id");
-    return 1;
+    RCLCPP_ERROR(node->get_logger(), "Failed to get param %d", ego_id);
+    assert(false);
   }
 
   std::string agent_config_path;
   if (!node->get_parameter("agent_config_path", agent_config_path)) {
-    RCLCPP_ERROR(node->get_logger(), "Failed to get param agent_config_path");
-    return 1;
+    RCLCPP_ERROR(node->get_logger(), "Failed to get param agent_config_path %s", 
+                                      agent_config_path.c_str());
+    assert(false);
   }
 
   std::string bp_config_path;
   if (!node->get_parameter("bp_config_path", bp_config_path)) {
-    RCLCPP_ERROR(node->get_logger(), "Failed to get param bp_config_path");
-    return 1;
+    RCLCPP_ERROR(node->get_logger(), "Failed to get param bp_config_path %s", 
+                                      bp_config_path.c_str());
+    assert(false);
   }
 
   std::string ssc_config_path;
   if (!node->get_parameter("ssc_config_path", ssc_config_path)) {
-    RCLCPP_ERROR(node->get_logger(), "Failed to get param ssc_config_path");
-    return 1;
+    RCLCPP_ERROR(node->get_logger(), "Failed to get param ssc_config_path %s",
+                                      ssc_config_path.c_str());
+    assert(false);
   }
 
   semantic_map_manager::SemanticMapManager semantic_map_manager(ego_id, agent_config_path);
