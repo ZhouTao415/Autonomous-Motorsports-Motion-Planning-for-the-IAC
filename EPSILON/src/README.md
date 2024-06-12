@@ -47,6 +47,40 @@ pip install empy pygame
 ```
 
 #### Install OOQP
+Prerequisites:
+
+**BLAS：**
+
+```bash
+wget http://www.netlib.org/blas/blas.tgz
+tar zxf blas.tgz
+cd BLAS-3.12.0/
+gfortran -O3 -std=legacy -m64 -fno-second-underscore -fPIC -c *.f
+ar r libfblas.a *.o
+ranlib libfblas.a
+rm -rf *.o     
+export BLAS=~/my_lib/BLAS-3.10.0/libfblas.a 
+```
+
+**MA27：**
+
+```bash
+git clone https://github.com/HITSZ-LeggedRobotics/ma27.git
+cd ma27/ma27-1.0.0/
+bash ./configure CPPFLAGS="-fPIC" CFLAGS="-fPIC" FFLAGS="-fPIC"
+sudo make install
+```
+* Copy the libma27.a file in ma27/src to the ooqp folder
+
+**OOQP**
+```bash
+git clone https://github.com/emgertz/OOQP.git
+cd OOQP/
+./configure
+sudo make
+sudo make install
+```
+
 We use [OOQP](http://pages.cs.wisc.edu/~swright/ooqp/) for solving quadratic programming problems. Please refer to [link_1](https://github.com/emgertz/OOQP) and [link_2](http://pages.cs.wisc.edu/~swright/ooqp/) for the installation instruction.
 
 
