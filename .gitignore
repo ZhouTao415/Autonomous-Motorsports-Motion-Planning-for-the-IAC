@@ -1,3 +1,5 @@
 .vscode/*
 /EPSILON/src/core/common/thirdparty/*
-
+/EPSILON/build/*
+/EPSILON/install/*
+/EPSILON/log/*
