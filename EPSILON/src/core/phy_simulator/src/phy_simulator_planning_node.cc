@@ -33,17 +33,14 @@ bool flag_rcv_initial_state = false;
 Vec3f goal_state(0, 0, 0);
 bool flag_rcv_goal_state = false;
 
-void CtrlSignalCallback(const vehicle_msgs::msg::ControlSignal::SharedPtr msg,
-                        int index) {
+void CtrlSignalCallback(const vehicle_msgs::msg::ControlSignal::SharedPtr msg, int index) {
   common::VehicleControlSignal ctrl;
   vehicle_msgs::Decoder::GetControlSignalFromRosControlSignal(*msg, &ctrl);
   _signal_set.signal_set[index] = ctrl;
 }
 
-void InitialPoseCallback(
-    const geometry_msgs::msg::PoseWithCovarianceStamped::SharedPtr msg) {
-  common::VisualizationUtil::Get3DofStateFromRosPose(msg->pose.pose,
-                                                     &initial_state);
+void InitialPoseCallback(const geometry_msgs::msg::PoseWithCovarianceStamped::SharedPtr msg) {
+  common::VisualizationUtil::Get3DofStateFromRosPose(msg->pose.pose, &initial_state);
   flag_rcv_initial_state = true;
 }
 
@@ -53,27 +50,46 @@ void NavGoalCallback(const geometry_msgs::msg::PoseStamped::SharedPtr msg) {
 }
 
 int main(int argc, char** argv) {
-  // 使用了 "~" 作为匿名名称，这意味着每次启动节点时都会生成一个唯一的名称
   rclcpp::init(argc, argv);
-  auto nh = std::make_shared<rclcpp::Node>("phy_simulator_planning_node");
+  auto nh = rclcpp::Node::make_shared("phy_simulator_planning_node");
 
-  std::string vehicle_info_path;
-  if (!nh->get_parameter("vehicle_info_path", vehicle_info_path)) {
-    RCLCPP_ERROR(nh->get_logger(), "Failed to get param %s", vehicle_info_path.c_str());
-    assert(false);
-  }
-  std::string map_path;
-  if (!nh->get_parameter("map_path", map_path)) {
-    RCLCPP_ERROR(nh->get_logger(), "Failed to get param %s", map_path.c_str());
-    assert(false);
-  }
-  std::string lane_net_path;
-  if (!nh->get_parameter("lane_net_path", lane_net_path)) {
-    RCLCPP_ERROR(nh->get_logger(), "Failed to get param %s", lane_net_path.c_str());
-    assert(false);
+  nh->declare_parameter("vehicle_info_path", "");
+  nh->declare_parameter("map_path", "");
+  nh->declare_parameter("lane_net_path", "");
+
+  std::string vehicle_info_path = nh->get_parameter("vehicle_info_path").as_string();
+  std::string map_path = nh->get_parameter("map_path").as_string();
+  std::string lane_net_path = nh->get_parameter("lane_net_path").as_string();
+
+  if (vehicle_info_path.empty()) {
+    RCLCPP_ERROR(nh->get_logger(), "Failed to get parameter: vehicle_info_path");
+    return -1;
   }
 
-  PhySimulation phy_sim(vehicle_info_path, map_path, lane_net_path);
+  if (map_path.empty()) {
+    RCLCPP_ERROR(nh->get_logger(), "Failed to get parameter: map_path");
+    return -1;
+  }
+
+  if (lane_net_path.empty()) {
+    RCLCPP_ERROR(nh->get_logger(), "Failed to get parameter: lane_net_path");
+    return -1;
+  }
+
+  RCLCPP_INFO(nh->get_logger(), "Vehicle Info Path: %s", vehicle_info_path.c_str());
+  RCLCPP_INFO(nh->get_logger(), "Map Path: %s", map_path.c_str());
+  RCLCPP_INFO(nh->get_logger(), "Lane Net Path: %s", lane_net_path.c_str());
+
+  PhySimulation phy_sim;
+  try {
+    phy_sim = PhySimulation(vehicle_info_path, map_path, lane_net_path);
+  } catch (const nlohmann::json::parse_error& e) {
+    RCLCPP_ERROR(nh->get_logger(), "JSON parse error: %s", e.what());
+    return -1;
+  } catch (const std::exception& e) {
+    RCLCPP_ERROR(nh->get_logger(), "Exception: %s", e.what());
+    return -1;
+  }
 
   RosAdapter ros_adapter(nh);
   ros_adapter.set_phy_sim(&phy_sim);
@@ -87,8 +103,7 @@ int main(int argc, char** argv) {
 
   for (int i = 0; i < num_vehicles; i++) {
     auto vehicle_id = vehicle_ids[i];
-    std::string topic_name =
-        std::string("/ctrl/agent_") + std::to_string(vehicle_id);
+    std::string topic_name = std::string("/ctrl/agent_") + std::to_string(vehicle_id);
     printf("subscribing to %s\n", topic_name.c_str());
     _ros_sub[i] = nh->create_subscription<vehicle_msgs::msg::ControlSignal>(
         topic_name, 10, [vehicle_id](const vehicle_msgs::msg::ControlSignal::SharedPtr msg) {
@@ -112,8 +127,7 @@ int main(int argc, char** argv) {
   rclcpp::Time next_gt_static_pub_time = next_gt_pub_time;
   rclcpp::Time next_vis_pub_time = rclcpp::Clock(RCL_ROS_TIME).now();
 
-  std::cout << "[PhySimulation] Initialization finished, waiting for callback"
-            << std::endl;
+  std::cout << "[PhySimulation] Initialization finished, waiting for callback" << std::endl;
 
   while (rclcpp::ok()) {
     rclcpp::spin_some(nh);

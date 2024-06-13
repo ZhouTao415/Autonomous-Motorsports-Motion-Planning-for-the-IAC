@@ -61,12 +61,20 @@ target_link_libraries(phy_simulator_planning_node
 )
 
 # Install the targets
+# install(TARGETS phy_simulator_lib phy_simulator_planning_node
+#   EXPORT export_phy_simulator
+#   LIBRARY DESTINATION lib
+#   ARCHIVE DESTINATION lib
+#   RUNTIME DESTINATION lib/${PROJECT_NAME}
+#   INCLUDES DESTINATION include
+# )
+
 install(TARGETS phy_simulator_lib phy_simulator_planning_node
-  EXPORT export_phy_simulator
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
-  RUNTIME DESTINATION lib/${PROJECT_NAME}
-  INCLUDES DESTINATION include
+    EXPORT ${PROJECT_NAME}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIB_PREFIX}  # 动态库安装路径
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIB_PREFIX}  # 静态库安装路径
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BIN_PREFIX}  # 可执行文件安装路径
+    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDE_PREFIX}  # 头文件安装路径
 )
 
 install(DIRECTORY include/

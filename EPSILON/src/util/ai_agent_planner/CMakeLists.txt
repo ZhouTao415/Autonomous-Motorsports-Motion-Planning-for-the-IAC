@@ -2,9 +2,7 @@ cmake_minimum_required(VERSION 3.5)
 project(ai_agent_planner)
 
 # Enforce C++17 standard
-if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 17)
-endif()
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_BUILD_TYPE "Release")
 add_compile_options(-O3 -Wall)
@@ -37,15 +35,6 @@ include_directories(
     
 )
 
-include_directories(
-    ${catkin_INCLUDE_DIRS}
-    ${common_INCLUDE_DIRS}
-    ${semantic_map_manager_INCLUDE_DIRS}
-    ${vehicle_model_INCLUDE_DIRS}
-    ${forward_simulator_INCLUDE_DIRS}
-    ${behavior_planner_INCLUDE_DIRS}
-)
-
 add_executable(onlane_ai_agent
     src/onlane_ai_agent.cc
 )
@@ -53,6 +42,7 @@ add_executable(onlane_ai_agent
 # Link libraries
 target_link_libraries(onlane_ai_agent
     dw
+    ${catkin_INCLUDE_DIRS}
     ${rclcpp_LIBRARIES}
     ${common_LIBRARIES}
     ${semantic_map_manager_LIBRARIES}
@@ -63,7 +53,10 @@ target_link_libraries(onlane_ai_agent
     ooqpgensparse
     ooqpsparse 
     ooqpgondzio 
-    ooqpbase blas ma27 gfortran 
+    ooqpbase 
+    blas 
+    ma27 
+    gfortran 
 )
 
 ament_package()

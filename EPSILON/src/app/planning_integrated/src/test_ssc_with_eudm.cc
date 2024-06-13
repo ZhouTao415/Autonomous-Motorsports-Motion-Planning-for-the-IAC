@@ -32,6 +32,8 @@ int main(int argc, char** argv) {
   auto node = rclcpp::Node::make_shared("planning_integrated");
   auto options = rclcpp::NodeOptions();
 
+  RCLCPP_INFO(node->get_logger(), "Node name: %s", node->get_name());
+
   node->declare_parameter<int>("ego_id", 0);
   node->declare_parameter<std::string>("agent_config_path", "");
   node->declare_parameter<std::string>("bp_config_path", "");
@@ -66,6 +68,7 @@ int main(int argc, char** argv) {
     assert(false);
   }
 
+
   semantic_map_manager::SemanticMapManager semantic_map_manager(ego_id, agent_config_path);
   semantic_map_manager::RosAdapter smm_ros_adapter(options, &semantic_map_manager);
   smm_ros_adapter.BindMapUpdateCallback(SemanticMapUpdateCallback);
@@ -86,6 +89,16 @@ int main(int argc, char** argv) {
 
   p_bp_server_->Start();
   p_ssc_server_->Start();
+
+
+  // Logging parameters for verification
+  RCLCPP_INFO(node->get_logger(), "ego_id: %d", ego_id);
+  RCLCPP_INFO(node->get_logger(), "agent_config_path: %s", agent_config_path.c_str());
+  RCLCPP_INFO(node->get_logger(), "bp_config_path: %s", bp_config_path.c_str());
+  RCLCPP_INFO(node->get_logger(), "ssc_config_path: %s", ssc_config_path.c_str());
+  RCLCPP_INFO(node->get_logger(), "desired_vel: %f", desired_vel);
+  // RCLCPP_INFO(node->get_logger(), "use_sim_state: %s", use_sim_state ? "true" : "false");
+
 
   rclcpp::Rate rate(100);
   while (rclcpp::ok()) {

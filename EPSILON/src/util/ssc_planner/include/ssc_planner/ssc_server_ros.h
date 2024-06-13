@@ -70,6 +70,7 @@ class SscPlannerServer : public rclcpp::Node {
   bool is_replan_on_ = false;
   bool is_map_updated_ = false;
   bool use_sim_state_ = true;
+
   std::unique_ptr<FrenetTrajectory> executing_traj_;
   std::unique_ptr<FrenetTrajectory> next_traj_;
 
@@ -96,6 +97,8 @@ class SscPlannerServer : public rclcpp::Node {
 
   vec_E<common::State> desired_state_hist_;
   vec_E<common::State> ctrl_state_hist_;
+  // Mutex lock to ensure thread-safe access
+  std::mutex planner_mutex_;
 };
 
 }  // namespace planning

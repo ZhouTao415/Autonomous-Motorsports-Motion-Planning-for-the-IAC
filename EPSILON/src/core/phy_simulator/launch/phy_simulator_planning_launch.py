@@ -1,6 +1,6 @@
 from launch import LaunchDescription
 from launch_ros.actions import Node
-from launch.actions import DeclareLaunchArgument
+from launch.actions import DeclareLaunchArgument, LogInfo
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.actions import IncludeLaunchDescription
@@ -53,8 +53,8 @@ def generate_launch_description():
             ])
         }],
         remappings=[
-            ('arena_info_static', LaunchConfiguration('arena_info_static_topic')),
-            ('arena_info_dynamic', LaunchConfiguration('arena_info_dynamic_topic'))
+            ('/phy_simulator/arena_info_static', LaunchConfiguration('arena_info_static_topic')),
+            ('/phy_simulator/arena_info_dynamic', LaunchConfiguration('arena_info_dynamic_topic'))
         ]
     )
 
@@ -63,5 +63,10 @@ def generate_launch_description():
         arena_info_dynamic_topic,
         playground,
         joy_ctrl_launch,
+        LogInfo(msg=['arena_info_static_topic: ', LaunchConfiguration('arena_info_static_topic')]),
+        LogInfo(msg=['arena_info_dynamic_topic: ', LaunchConfiguration('arena_info_dynamic_topic')]),
+        LogInfo(msg=['playground: ', LaunchConfiguration('playground')]),
+        LogInfo(msg=['parameters: ', LaunchConfiguration('playground')]),
+        LogInfo(msg="Launching node..."),
         phy_simulator_planning_node
     ])
