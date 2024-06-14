@@ -1,3 +1,4 @@
+// Your converted code
 #ifndef _CORE_BEHAVIOR_PLANNER_INC_BEHAVIOR_PLANNER_ROS_ADAPTER_H_
 #define _CORE_BEHAVIOR_PLANNER_INC_BEHAVIOR_PLANNER_ROS_ADAPTER_H_
 
@@ -21,8 +22,7 @@ namespace planning {
 
 class BehaviorPlannerVisualizer {
  public:
-  BehaviorPlannerVisualizer(rclcpp::Node::SharedPtr nh, BehaviorPlanner* ptr_bp,
-                            int ego_id)
+  BehaviorPlannerVisualizer(std::shared_ptr<rclcpp::Node> nh, BehaviorPlanner* ptr_bp, int ego_id)
       : nh_(nh), ego_id_(ego_id) {
     p_bp_ = ptr_bp;
   }
@@ -31,8 +31,7 @@ class BehaviorPlannerVisualizer {
     std::string forward_traj_topic = std::string("/vis/agent_") +
                                      std::to_string(ego_id_) +
                                      std::string("/forward_trajs");
-    forward_traj_vis_pub_ =
-        nh_->create_publisher<visualization_msgs::msg::MarkerArray>(forward_traj_topic, 1);
+    forward_traj_vis_pub_ = nh_->create_publisher<visualization_msgs::msg::MarkerArray>(forward_traj_topic, 1);
   }
 
   void PublishDataWithStamp(const rclcpp::Time& stamp) {
@@ -47,14 +46,12 @@ class BehaviorPlannerVisualizer {
         pt.z = 0.3;
         points.push_back(pt);
         visualization_msgs::msg::Marker point_marker;
-        // point_marker.ns = "point";
         common::VisualizationUtil::GetRosMarkerCylinderUsingPoint(
             common::Point(pt), Vec3f(0.5, 0.5, 0.1), traj_color, 0,
             &point_marker);
         traj_list_marker.markers.push_back(point_marker);
       }
       visualization_msgs::msg::Marker line_marker;
-      // line_marker.ns = "line";
       common::VisualizationUtil::GetRosMarkerLineStripUsingPoints(
           points, Vec3f(0.1, 0.1, 0.1), traj_color, 0, &line_marker);
       traj_list_marker.markers.push_back(line_marker);
@@ -68,7 +65,8 @@ class BehaviorPlannerVisualizer {
   }
 
  private:
-  rclcpp::Node::SharedPtr nh_;
+  // rclcpp::Node::SharedPtr nh_;
+  std::shared_ptr<rclcpp::Node> nh_;
   int ego_id_;
 
   int last_forward_trajs_marker_cnt_ = 0;

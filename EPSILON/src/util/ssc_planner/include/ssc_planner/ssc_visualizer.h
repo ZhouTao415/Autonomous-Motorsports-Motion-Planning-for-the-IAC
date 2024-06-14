@@ -29,7 +29,7 @@ namespace planning {
 
 class SscVisualizer {
 public:
-  SscVisualizer(rclcpp::Node::SharedPtr nh, int node_id);
+  SscVisualizer(std::shared_ptr<rclcpp::Node> nh, int node_id);
   ~SscVisualizer() {}
 
   void VisualizeDataWithStamp(const rclcpp::Time &stamp,
@@ -55,7 +55,7 @@ private:
   int last_traj_list_marker_cnt_ = 0;
   int last_surrounding_vehicle_marker_cnt_ = 0;
 
-  rclcpp::Node::SharedPtr nh_;
+  std::shared_ptr<rclcpp::Node> nh_;
   int node_id_;
 
   decimal_t start_time_;

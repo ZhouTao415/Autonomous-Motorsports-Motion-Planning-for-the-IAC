@@ -11,7 +11,7 @@ namespace phy_simulator {
 
 RosAdapter::RosAdapter() {}
 
-RosAdapter::RosAdapter(rclcpp::Node::SharedPtr nh) : nh_(nh) {
+RosAdapter::RosAdapter(std::shared_ptr<rclcpp::Node> nh) : nh_(nh) {
   // arena_info_pub_ = nh_->create_publisher<vehicle_msgs::msg::ArenaInfo>("arena_info", 10);
   arena_info_static_pub_ =
       nh_->create_publisher<vehicle_msgs::msg::ArenaInfoStatic>("arena_info_static", 10);

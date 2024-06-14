@@ -11,7 +11,7 @@
 
 namespace planning {
 
-SscVisualizer::SscVisualizer(rclcpp::Node::SharedPtr nh, int node_id)
+SscVisualizer::SscVisualizer(std::shared_ptr<rclcpp::Node> nh, int node_id)
     : nh_(nh), node_id_(node_id) {
   std::cout << "node_id_ = " << node_id_ << std::endl;
 

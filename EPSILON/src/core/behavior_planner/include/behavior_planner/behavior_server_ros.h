@@ -1,15 +1,9 @@
-/**
- * @file behavior_server_ros.h
- * @brief planner server
- * @version 0.1
- * @date 2019-02
- */
-
 #ifndef _CORE_BEHAVIOR_PLANNER_INC_BEHAVIOR_SERVER_ROS_H__
 #define _CORE_BEHAVIOR_PLANNER_INC_BEHAVIOR_SERVER_ROS_H__
 
 #include <chrono>
 #include <functional>
+#include <memory>
 #include <numeric>
 #include <thread>
 
@@ -68,7 +62,7 @@ class BehaviorPlannerServer : public rclcpp::Node, public std::enable_shared_fro
 
   BehaviorPlannerServer(const rclcpp::NodeOptions &options, int ego_id);
   BehaviorPlannerServer(const rclcpp::NodeOptions &options, double work_rate, int ego_id);
-  
+
  private:
 
   void Initialize();
@@ -82,13 +76,14 @@ class BehaviorPlannerServer : public rclcpp::Node, public std::enable_shared_fro
 
   BehaviorPlanner bp_;
   BehaviorPlannerMapAdapter map_adapter_;
-  std::unique_ptr<BehaviorPlannerVisualizer> p_visualizer_;
+  std::shared_ptr<BehaviorPlannerVisualizer> p_visualizer_;
 
   TicToc time_profile_tool_;
   decimal_t global_init_stamp_{0.0};
 
   // ROS2 related
-  double work_rate_;
+  // double work_rate_;
+  decimal_t work_rate_ = 20.0;
   int ego_id_;
 
   bool require_intervention_signal_ = false;

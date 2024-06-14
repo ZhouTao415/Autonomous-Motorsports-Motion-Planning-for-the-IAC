@@ -34,7 +34,7 @@ class RosAdapter {
    *
    * @param nh node handle
    */
-  RosAdapter(rclcpp::Node::SharedPtr nh);
+  RosAdapter(std::shared_ptr<rclcpp::Node> nh);
 
   void set_phy_sim(PhySimulation *p_phy_sim) { p_phy_sim_ = p_phy_sim; }
 
@@ -60,7 +60,7 @@ class RosAdapter {
   void PublishStaticDataWithStamp(const rclcpp::Time &stamp);
 
  private:
-  rclcpp::Node::SharedPtr nh_;
+  std::shared_ptr<rclcpp::Node> nh_;
   rclcpp::Publisher<vehicle_msgs::msg::ArenaInfo>::SharedPtr arena_info_pub_;
   rclcpp::Publisher<vehicle_msgs::msg::ArenaInfoStatic>::SharedPtr arena_info_static_pub_;
   rclcpp::Publisher<vehicle_msgs::msg::ArenaInfoDynamic>::SharedPtr arena_info_dynamic_pub_;
