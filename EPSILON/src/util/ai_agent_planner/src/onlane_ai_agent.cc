@@ -1,10 +1,10 @@
 #include <rclcpp/rclcpp.hpp>
-#include <std_msgs/msg/string.hpp>
-#include <sensor_msgs/msg/joy.hpp>
-#include <vehicle_msgs/msg/control_signal.hpp>
+#include <stdlib.h>
+
 #include <chrono>
 #include <iostream>
 #include <random>
+
 #include "behavior_planner/behavior_server_ros.h"
 #include "common/basics/tic_toc.h"
 #include "forward_simulator/multimodal_forward.h"
@@ -12,6 +12,9 @@
 #include "semantic_map_manager/ros_adapter.h"
 #include "semantic_map_manager/semantic_map_manager.h"
 #include "semantic_map_manager/visualizer.h"
+#include "sensor_msgs/msg/joy.hpp"
+#include "vehicle_msgs/msg/control_signal.hpp"
+#include "vehicle_msgs/encoder.h"
 
 DECLARE_BACKWARD;
 double fs_work_rate = 50.0;
@@ -20,9 +23,10 @@ double bp_work_rate = 20.0;
 int ego_id;
 
 rclcpp::Publisher<vehicle_msgs::msg::ControlSignal>::SharedPtr ctrl_signal_pub_;
-std::shared_ptr<planning::BehaviorPlannerServer> p_bp_server_;
-std::shared_ptr<moodycamel::ReaderWriterQueue<semantic_map_manager::SemanticMapManager>> p_ctrl_input_smm_buff_;
-std::shared_ptr<semantic_map_manager::Visualizer> p_smm_vis_;
+std::shared_ptr<planning::BehaviorPlannerServer> p_bp_server_{nullptr};
+moodycamel::ReaderWriterQueue<semantic_map_manager::SemanticMapManager>*
+    p_ctrl_input_smm_buff_{nullptr};
+std::shared_ptr<semantic_map_manager::Visualizer> p_smm_vis_{nullptr};
 
 common::State desired_state;
 bool has_init_state = false;
@@ -32,7 +36,7 @@ rclcpp::Time next_vis_pub_time;
 semantic_map_manager::SemanticMapManager last_smm;
 planning::OnLaneForwardSimulation::Param sim_param;
 
-// Add noise
+// ~ Add noise
 std::mt19937 rng;
 double vel_noise = 0.0;
 int cnt = 0;
@@ -61,7 +65,7 @@ void RandomBehavior() {
     std::uniform_real_distribution<double> dist_vel(-2, 5);
     vel_noise = dist_vel(rng);
     p_bp_server_->set_user_desired_velocity(desired_vel + vel_noise);
-    RCLCPP_INFO(rclcpp::get_logger("eudm_planner"), "[OnlaneAi]%d - desired velocity: %lf", ego_id,
+    printf("[OnlaneAi]%d - desired velocity: %lf\n", ego_id,
            desired_vel + vel_noise);
   }
   cnt++;
@@ -92,6 +96,8 @@ void PublishControl() {
   }
   common::Vehicle ego_vehicle = last_smm.ego_vehicle();
   ego_vehicle.set_state(desired_state);
+  // ~ Add noise
+  // command_vel = std::max(command_vel + vel_noise, 0.0);
   sim_param.idm_param.kDesiredVelocity = command_vel;
 
   common::Vehicle leading_vehicle;
@@ -106,25 +112,24 @@ void PublishControl() {
           common::StateTransformer(last_smm.ego_behavior().ref_lane),
           ego_vehicle, leading_vehicle, delta_t, sim_param,
           &state) != kSuccess) {
-    RCLCPP_ERROR(rclcpp::get_logger("eudm_planner"), "[AiAgent]Err-Simulation error (with leading vehicle).");
+    printf("[AiAgent]Err-Simulation error (with leading vehicle).\n");
     return;
   }
 
   common::VehicleControlSignal ctrl(state);
   {
     vehicle_msgs::msg::ControlSignal ctrl_msg;
-    // Here, you should implement your own Encoder functionality
-    // vehicle_msgs::Encoder::GetRosControlSignalFromControlSignal(
-    //     ctrl, rclcpp::Clock().now(), std::string("map"), &ctrl_msg);
+    vehicle_msgs::Encoder::GetRosControlSignalFromControlSignal(
+        ctrl, rclcpp::Clock().now(), std::string("map"), &ctrl_msg);
     ctrl_signal_pub_->publish(ctrl_msg);
   }
   desired_state = ctrl.state;
 
   // visualization
   {
-    auto tnow = rclcpp::Clock().now();
+    rclcpp::Time tnow = rclcpp::Clock().now();
     if (tnow >= next_vis_pub_time) {
-      next_vis_pub_time = tnow + rclcpp::Duration::from_seconds(1.0 / visualization_msg_rate);
+      next_vis_pub_time += rclcpp::Duration::from_seconds(1.0 / visualization_msg_rate);
       p_smm_vis_->VisualizeDataWithStamp(tnow, last_smm);
       p_smm_vis_->SendTfWithStamp(tnow, last_smm);
     }
@@ -133,38 +138,47 @@ void PublishControl() {
 
 int main(int argc, char** argv) {
   rclcpp::init(argc, argv);
-  auto node = rclcpp::Node::make_shared("eudm_planner");
+  auto nh = rclcpp::Node::make_shared("behavior_planner_node");
 
-  next_vis_pub_time = rclcpp::Clock().now();
+  next_vis_pub_time = nh->now();
 
-  if (!node->get_parameter("ego_id", ego_id)) {
-    RCLCPP_ERROR(node->get_logger(), "Failed to get param ego_id");
-    return 1;
+  if (!nh->get_parameter("ego_id", ego_id)) {
+    RCLCPP_ERROR(nh->get_logger(), "Failed to get param ego_id");
+    assert(false);
   }
 
   std::string agent_config_path;
-  if (!node->get_parameter("agent_config_path", agent_config_path)) {
-    RCLCPP_ERROR(node->get_logger(), "Failed to get param agent_config_path");
-    return 1;
+  if (!nh->get_parameter("agent_config_path", agent_config_path)) {
+    RCLCPP_ERROR(nh->get_logger(), "Failed to get param agent_config_path");
+    assert(false);
   }
 
-  ctrl_signal_pub_ = node->create_publisher<vehicle_msgs::msg::ControlSignal>("ctrl", 10);
+  ctrl_signal_pub_ = nh->create_publisher<vehicle_msgs::msg::ControlSignal>("ctrl", 10);
 
   int autonomous_level;
-  node->get_parameter_or("desired_vel", desired_vel, 6.0);
-  node->get_parameter_or("autonomous_level", autonomous_level, 2);
+  nh->declare_parameter("desired_vel", 6.0);
+  nh->get_parameter("desired_vel", desired_vel);
+  nh->declare_parameter("autonomous_level", 2);
+  nh->get_parameter("autonomous_level", autonomous_level);
 
-  rng.seed(std::chrono::high_resolution_clock::now().time_since_epoch().count());
-  node->get_parameter_or("aggressiveness_level", aggressiveness_level, 3);
+  // Get desired velocity noise
+  rng.seed(
+      std::chrono::high_resolution_clock::now().time_since_epoch().count());
+  // config aggressiveness
+  nh->declare_parameter("aggressiveness_level", 3);
+  nh->get_parameter("aggressiveness_level", aggressiveness_level);
+
   planning::MultiModalForward::ParamLookUp(aggressiveness_level, &sim_param);
-  RCLCPP_INFO(node->get_logger(), "[OnlaneAi]%d - aggresive: %d", ego_id, aggressiveness_level);
+  printf("[OnlaneAi]%d - aggresive: %d\n", ego_id, aggressiveness_level);
 
-  semantic_map_manager::SemanticMapManager semantic_map_manager(ego_id, agent_config_path);
-  semantic_map_manager::RosAdapter smm_ros_adapter{rclcpp::NodeOptions(), &semantic_map_manager};
-  p_smm_vis_ = std::make_shared<semantic_map_manager::Visualizer>(rclcpp::NodeOptions(), ego_id);
+  // Declare smm
+  semantic_map_manager::SemanticMapManager semantic_map_manager(
+      ego_id, agent_config_path);
+  semantic_map_manager::RosAdapter smm_ros_adapter(nh->get_node_options(), &semantic_map_manager);
+  p_smm_vis_ = std::make_shared<semantic_map_manager::Visualizer>(nh->get_node_options(), ego_id);
 
-  // Pass rclcpp::NodeOptions() instead of node to the BehaviorPlannerServer constructor
-  p_bp_server_ = std::make_shared<planning::BehaviorPlannerServer>(rclcpp::NodeOptions(), bp_work_rate, ego_id);
+  // Declare bp
+  p_bp_server_ = planning::BehaviorPlannerServer::Create(nh->get_node_options(), bp_work_rate, ego_id);
   p_bp_server_->set_user_desired_velocity(desired_vel);
   p_bp_server_->set_autonomous_level(autonomous_level);
   p_bp_server_->set_aggressive_level(aggressiveness_level);
@@ -173,16 +187,16 @@ int main(int argc, char** argv) {
   smm_ros_adapter.BindMapUpdateCallback(SemanticMapUpdateCallback);
   p_bp_server_->BindBehaviorUpdateCallback(BehaviorUpdateCallback);
 
-  smm_ros_adapter.Init();  // Ensure Init is public
+  smm_ros_adapter.Init();
   p_bp_server_->Init();
 
-  p_ctrl_input_smm_buff_ = std::make_shared<moodycamel::ReaderWriterQueue<semantic_map_manager::SemanticMapManager>>(100);
+  p_ctrl_input_smm_buff_ = new moodycamel::ReaderWriterQueue<
+      semantic_map_manager::SemanticMapManager>(100);
 
   p_bp_server_->Start();
-
   rclcpp::Rate rate(fs_work_rate);
   while (rclcpp::ok()) {
-    rclcpp::spin_some(node);
+    rclcpp::spin_some(nh);
     PublishControl();
     rate.sleep();
   }

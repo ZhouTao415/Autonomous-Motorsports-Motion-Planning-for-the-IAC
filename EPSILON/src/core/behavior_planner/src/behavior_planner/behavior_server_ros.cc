@@ -1,18 +1,39 @@
+/**
+ * @file behavior_server_ros.cc
+ * @brief implementation for behavior planner server
+ * @version 0.1
+ * @date 2019-02
+ */
+
 #include "behavior_planner/behavior_server_ros.h"
 
 namespace planning {
 
+std::shared_ptr<BehaviorPlannerServer> BehaviorPlannerServer::Create(const rclcpp::NodeOptions &options, int ego_id) {
+  auto server = std::shared_ptr<BehaviorPlannerServer>(new BehaviorPlannerServer(options, ego_id));
+  server->Initialize();
+  return server;
+}
+
+std::shared_ptr<BehaviorPlannerServer> BehaviorPlannerServer::Create(const rclcpp::NodeOptions &options, double work_rate, int ego_id) {
+  auto server = std::shared_ptr<BehaviorPlannerServer>(new BehaviorPlannerServer(options, work_rate, ego_id));
+  server->Initialize();
+  return server;
+}
+
 BehaviorPlannerServer::BehaviorPlannerServer(const rclcpp::NodeOptions &options, int ego_id)
     : Node("behavior_planner_server", options), work_rate_(20.0), ego_id_(ego_id) {
-  p_visualizer_ = new BehaviorPlannerVisualizer(shared_from_this(), &bp_, ego_id);
   p_input_smm_buff_ = new moodycamel::ReaderWriterQueue<SemanticMapManager>(config_.kInputBufferSize);
 }
 
-BehaviorPlannerServer::BehaviorPlannerServer(const rclcpp::NodeOptions &options,
-                                             double work_rate, int ego_id)
+BehaviorPlannerServer::BehaviorPlannerServer(const rclcpp::NodeOptions &options, double work_rate, int ego_id)
     : Node("behavior_planner_server", options), work_rate_(work_rate), ego_id_(ego_id) {
-  p_visualizer_ = new BehaviorPlannerVisualizer(shared_from_this(), &bp_, ego_id);
   p_input_smm_buff_ = new moodycamel::ReaderWriterQueue<SemanticMapManager>(config_.kInputBufferSize);
+}
+
+void BehaviorPlannerServer::Initialize() {
+  p_visualizer_ = std::make_unique<BehaviorPlannerVisualizer>(
+      std::enable_shared_from_this<BehaviorPlannerServer>::shared_from_this(), &bp_, ego_id_);
 }
 
 void BehaviorPlannerServer::PushSemanticMap(const SemanticMapManager& smm) {
@@ -20,23 +41,23 @@ void BehaviorPlannerServer::PushSemanticMap(const SemanticMapManager& smm) {
 }
 
 void BehaviorPlannerServer::PublishData() {
-  p_visualizer_->PublishDataWithStamp(rclcpp::Clock(RCL_ROS_TIME).now());
+  p_visualizer_->PublishDataWithStamp(this->now());
 }
 
 void BehaviorPlannerServer::Init() {
   bp_.Init("bp");
   if (bp_.autonomous_level() >= 2) {
-    joy_sub_ = create_subscription<sensor_msgs::msg::Joy>(
+    joy_sub_ = this->create_subscription<sensor_msgs::msg::Joy>(
         "/joy", 10, std::bind(&BehaviorPlannerServer::JoyCallback, this, std::placeholders::_1));
   }
   bool use_sim_state = true;
-  declare_parameter("use_sim_state", use_sim_state);
-  get_parameter("use_sim_state", use_sim_state);
+  this->declare_parameter("use_sim_state", true);
+  this->get_parameter("use_sim_state", use_sim_state);
   bp_.set_use_sim_state(use_sim_state);
   p_visualizer_->Init();
 }
 
-void BehaviorPlannerServer::JoyCallback(const sensor_msgs::msg::Joy::ConstSharedPtr& msg) {
+void BehaviorPlannerServer::JoyCallback(const sensor_msgs::msg::Joy::ConstSharedPtr msg) {
   if (bp_.autonomous_level() < 2) return;
   if (!is_hmi_enabled_) return;
   int msg_id;
@@ -126,15 +147,16 @@ void BehaviorPlannerServer::set_aggressive_level(int level) {
   bp_.set_aggressive_level(level);
 }
 
-void BehaviorPlannerServer::set_user_desired_velocity(const double desired_vel) {
+void BehaviorPlannerServer::set_user_desired_velocity(
+    const decimal_t desired_vel) {
   bp_.set_user_desired_velocity(desired_vel);
 }
 
-double BehaviorPlannerServer::user_desired_velocity() const {
+decimal_t BehaviorPlannerServer::user_desired_velocity() const {
   return bp_.user_desired_velocity();
 }
 
-double BehaviorPlannerServer::reference_desired_velocity() const {
+decimal_t BehaviorPlannerServer::reference_desired_velocity() const {
   return bp_.reference_desired_velocity();
 }
 

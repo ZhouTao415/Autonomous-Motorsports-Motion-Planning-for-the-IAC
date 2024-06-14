@@ -1,6 +1,5 @@
 /**
  * @file ssc_server_ros.h
- * @author HKUST
  * @brief planner server
  * @version 0.1
  * @date 2019-02
@@ -35,7 +34,7 @@
 #include "visualization_msgs/msg/marker_array.hpp"
 
 namespace planning {
-class SscPlannerServer : public rclcpp::Node {
+class SscPlannerServer : public rclcpp::Node, public std::enable_shared_from_this<SscPlannerServer> {
  public:
   using SemanticMapManager = semantic_map_manager::SemanticMapManager;
   using FrenetTrajectory = common::FrenetTrajectory;
@@ -43,9 +42,8 @@ class SscPlannerServer : public rclcpp::Node {
     int kInputBufferSize{100};
   };
 
-  SscPlannerServer(const rclcpp::NodeOptions &options, int ego_id);
-
-  SscPlannerServer(const rclcpp::NodeOptions &options, double work_rate, int ego_id);
+  static std::shared_ptr<SscPlannerServer> Create(const rclcpp::NodeOptions &options, int ego_id);
+  static std::shared_ptr<SscPlannerServer> Create(const rclcpp::NodeOptions &options, double work_rate, int ego_id);
 
   void PushSemanticMap(const SemanticMapManager &smm);
 
@@ -53,13 +51,15 @@ class SscPlannerServer : public rclcpp::Node {
 
   void Start();
 
+  SscPlannerServer(const rclcpp::NodeOptions &options, int ego_id);
+  SscPlannerServer(const rclcpp::NodeOptions &options, double work_rate, int ego_id);
+  
  private:
+
+  void Initialize();
   void PlanCycleCallback();
-
   void Replan();
-
   void PublishData();
-
   void MainThread();
 
   ErrorType FilterSingularityState(const vec_E<common::State> &hist,
@@ -70,7 +70,6 @@ class SscPlannerServer : public rclcpp::Node {
   bool is_replan_on_ = false;
   bool is_map_updated_ = false;
   bool use_sim_state_ = true;
-
   std::unique_ptr<FrenetTrajectory> executing_traj_;
   std::unique_ptr<FrenetTrajectory> next_traj_;
 
@@ -80,6 +79,7 @@ class SscPlannerServer : public rclcpp::Node {
   TicToc time_profile_tool_;
   decimal_t global_init_stamp_{0.0};
 
+  // ROS2 related
   decimal_t work_rate_ = 20.0;
   int ego_id_;
 
@@ -88,17 +88,15 @@ class SscPlannerServer : public rclcpp::Node {
   rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr map_marker_pub_;
   rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr executing_traj_vis_pub_;
 
+  // input buffer
   moodycamel::ReaderWriterQueue<SemanticMapManager> *p_input_smm_buff_;
   SemanticMapManager last_smm_;
   std::unique_ptr<semantic_map_manager::Visualizer> p_smm_vis_;
-
   std::unique_ptr<SscVisualizer> p_ssc_vis_;
   int last_trajmk_cnt_{0};
 
   vec_E<common::State> desired_state_hist_;
   vec_E<common::State> ctrl_state_hist_;
-  // Mutex lock to ensure thread-safe access
-  std::mutex planner_mutex_;
 };
 
 }  // namespace planning
