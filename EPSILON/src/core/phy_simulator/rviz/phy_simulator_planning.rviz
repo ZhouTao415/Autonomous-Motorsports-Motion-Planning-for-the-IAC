@@ -15,7 +15,7 @@ Panels:
     Tree Height: 843
   - Class: rviz_common/Selection
     Name: Selection
-  - Class: rviz_default_plugins/ToolProperties
+  - Class: rviz_common/Tool Properties
     Expanded:
       - /2D Pose Estimate1
       - /2D Nav Goal1
