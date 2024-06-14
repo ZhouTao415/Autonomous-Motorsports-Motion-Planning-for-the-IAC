@@ -27,7 +27,7 @@ if (OPENMP_FOUND)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 endif()
 
-install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
+
 
 # Include directories
 include_directories(
@@ -97,7 +97,7 @@ target_link_libraries(test_ssc_with_eudm
 )
 
 # Exporting and installation setups
-ament_export_dependencies(
+ament_export_dependencies(test_ssc_with_eudm
     rclcpp
     visualization_msgs
     sensor_msgs
@@ -130,8 +130,12 @@ ament_export_include_directories(
 #   INCLUDES DESTINATION include
 # )
 
-install(TARGETS test_ssc_with_mpdm test_ssc_with_eudm
+install(TARGETS 
+  test_ssc_with_mpdm 
+  test_ssc_with_eudm
   DESTINATION lib/${PROJECT_NAME}
 )
+
+install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
 
 ament_package()

@@ -29,81 +29,78 @@ int SemanticMapUpdateCallback(const semantic_map_manager::SemanticMapManager& sm
 
 int main(int argc, char** argv) {
   rclcpp::init(argc, argv);
-  auto node = rclcpp::Node::make_shared("planning_integrated");
-  auto options = rclcpp::NodeOptions();
-
-  RCLCPP_INFO(node->get_logger(), "Node name: %s", node->get_name());
+  auto node = rclcpp::Node::make_shared("test_ssc_with_eudm");
 
   node->declare_parameter<int>("ego_id", 0);
-  node->declare_parameter<std::string>("agent_config_path", "");
-  node->declare_parameter<std::string>("bp_config_path", "");
-  node->declare_parameter<std::string>("ssc_config_path", "");
+  node->declare_parameter<std::string>("agent_config_path", "/home/tao/Desktop/Autonomous-Motorsports-Motion-Planning-for-the-IAC/EPSILON/src/core/playgrounds/highway_v1.0/agent_config.json");
+  node->declare_parameter<std::string>("bp_config_path", "/home/tao/Desktop/Autonomous-Motorsports-Motion-Planning-for-the-IAC/EPSILON/src/util/eudm_planner/config/eudm_config.pb.txt");
+  node->declare_parameter<std::string>("ssc_config_path", "/home/tao/Desktop/Autonomous-Motorsports-Motion-Planning-for-the-IAC/EPSILON/src/util/ssc_planner/config/ssc_config.pb.txt");
   node->declare_parameter<double>("desired_vel", 6.0);
   node->declare_parameter<bool>("use_sim_state", true);
 
   int ego_id;
-  if (!node->get_parameter("ego_id", ego_id)) {
-    RCLCPP_ERROR(node->get_logger(), "Failed to get param %d", ego_id);
-    assert(false);
-  }
-
   std::string agent_config_path;
-  if (!node->get_parameter("agent_config_path", agent_config_path)) {
-    RCLCPP_ERROR(node->get_logger(), "Failed to get param agent_config_path %s", 
-                                      agent_config_path.c_str());
-    assert(false);
-  }
-
   std::string bp_config_path;
-  if (!node->get_parameter("bp_config_path", bp_config_path)) {
-    RCLCPP_ERROR(node->get_logger(), "Failed to get param bp_config_path %s", 
-                                      bp_config_path.c_str());
-    assert(false);
-  }
-
   std::string ssc_config_path;
-  if (!node->get_parameter("ssc_config_path", ssc_config_path)) {
-    RCLCPP_ERROR(node->get_logger(), "Failed to get param ssc_config_path %s",
-                                      ssc_config_path.c_str());
-    assert(false);
+  double desired_vel;
+
+  if (!node->get_parameter("ego_id", ego_id)) {
+    RCLCPP_ERROR(node->get_logger(), "Failed to get parameter: ego_id");
+  } else {
+    RCLCPP_INFO(node->get_logger(), "ego_id: %d", ego_id);
   }
 
+  if (!node->get_parameter("agent_config_path", agent_config_path)) {
+    RCLCPP_ERROR(node->get_logger(), "Failed to get parameter: agent_config_path");
+  } else {
+    RCLCPP_INFO(node->get_logger(), "agent_config_path: %s", agent_config_path.c_str());
+  }
 
-  semantic_map_manager::SemanticMapManager semantic_map_manager(ego_id, agent_config_path);
-  semantic_map_manager::RosAdapter smm_ros_adapter(options, &semantic_map_manager);
-  smm_ros_adapter.BindMapUpdateCallback(SemanticMapUpdateCallback);
+  if (!node->get_parameter("bp_config_path", bp_config_path)) {
+    RCLCPP_ERROR(node->get_logger(), "Failed to get parameter: bp_config_path");
+  } else {
+    RCLCPP_INFO(node->get_logger(), "bp_config_path: %s", bp_config_path.c_str());
+  }
 
-  double desired_vel;
-  node->get_parameter("desired_vel", desired_vel);
+  if (!node->get_parameter("ssc_config_path", ssc_config_path)) {
+    RCLCPP_ERROR(node->get_logger(), "Failed to get parameter: ssc_config_path");
+  } else {
+    RCLCPP_INFO(node->get_logger(), "ssc_config_path: %s", ssc_config_path.c_str());
+  }
 
-  // Declare bp
-  p_bp_server_ = std::make_shared<planning::EudmPlannerServer>(options, bp_work_rate, ego_id);
-  p_bp_server_->set_user_desired_velocity(desired_vel);
-  p_bp_server_->BindBehaviorUpdateCallback(BehaviorUpdateCallback);
+  if (!node->get_parameter("desired_vel", desired_vel)) {
+    RCLCPP_ERROR(node->get_logger(), "Failed to get parameter: desired_vel");
+  } else {
+    RCLCPP_INFO(node->get_logger(), "desired_vel: %f", desired_vel);
+  }
 
-  p_ssc_server_ = std::make_shared<planning::SscPlannerServer>(options, ssc_planner_work_rate, ego_id);
+  try {
+    semantic_map_manager::SemanticMapManager semantic_map_manager(ego_id, agent_config_path);
+    semantic_map_manager::RosAdapter smm_ros_adapter(node->get_node_options(), &semantic_map_manager);
+    smm_ros_adapter.BindMapUpdateCallback(SemanticMapUpdateCallback);
 
-  p_ssc_server_->Init(ssc_config_path);
-  p_bp_server_->Init(bp_config_path);
-  smm_ros_adapter.Init();
+    p_bp_server_ = std::make_shared<planning::EudmPlannerServer>(node->get_node_options(), bp_work_rate, ego_id);
+    p_bp_server_->set_user_desired_velocity(desired_vel);
+    p_bp_server_->BindBehaviorUpdateCallback(BehaviorUpdateCallback);
 
-  p_bp_server_->Start();
-  p_ssc_server_->Start();
+    p_ssc_server_ = std::make_shared<planning::SscPlannerServer>(node->get_node_options(), ssc_planner_work_rate, ego_id);
 
+    p_ssc_server_->Init(ssc_config_path);
+    p_bp_server_->Init(bp_config_path);
+    smm_ros_adapter.Init();
 
-  // Logging parameters for verification
-  RCLCPP_INFO(node->get_logger(), "ego_id: %d", ego_id);
-  RCLCPP_INFO(node->get_logger(), "agent_config_path: %s", agent_config_path.c_str());
-  RCLCPP_INFO(node->get_logger(), "bp_config_path: %s", bp_config_path.c_str());
-  RCLCPP_INFO(node->get_logger(), "ssc_config_path: %s", ssc_config_path.c_str());
-  RCLCPP_INFO(node->get_logger(), "desired_vel: %f", desired_vel);
-  // RCLCPP_INFO(node->get_logger(), "use_sim_state: %s", use_sim_state ? "true" : "false");
+    p_bp_server_->Start();
+    p_ssc_server_->Start();
 
+    rclcpp::Rate rate(100);
+    while (rclcpp::ok()) {
+      rclcpp::spin_some(node);
+      rate.sleep();
+    }
 
-  rclcpp::Rate rate(100);
-  while (rclcpp::ok()) {
-    rclcpp::spin_some(node);
-    rate.sleep();
+  } catch (const std::exception &e) {
+    RCLCPP_ERROR(node->get_logger(), "Exception: %s", e.what());
+    return -1;
   }
 
   rclcpp::shutdown();

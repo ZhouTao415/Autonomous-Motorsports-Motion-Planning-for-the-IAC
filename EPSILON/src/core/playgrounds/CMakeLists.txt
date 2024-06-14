@@ -21,4 +21,6 @@ install(DIRECTORY data/
   FILES_MATCHING PATTERN "*.json" PATTERN "*.xml"
 )
 
+install(DIRECTORY highway_lite highway_v1.0 ring_small_v1.0 ring_tiny_v1.0 DESTINATION share/${PROJECT_NAME})
+
 ament_package()

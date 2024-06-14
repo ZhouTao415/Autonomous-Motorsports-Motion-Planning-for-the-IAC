@@ -53,26 +53,33 @@ int main(int argc, char** argv) {
   rclcpp::init(argc, argv);
   auto nh = rclcpp::Node::make_shared("phy_simulator_planning_node");
 
-  nh->declare_parameter("vehicle_info_path", "");
-  nh->declare_parameter("map_path", "");
-  nh->declare_parameter("lane_net_path", "");
+  nh->declare_parameter("vehicle_info_path", "/home/tao/Desktop/Autonomous-Motorsports-Motion-Planning-for-the-IAC/EPSILON/src/core/playgrounds/highway_v1.0/vehicle_set.json");
+  nh->declare_parameter("map_path", "/home/tao/Desktop/Autonomous-Motorsports-Motion-Planning-for-the-IAC/EPSILON/src/core/playgrounds/highway_v1.0/obstacles_norm.json");
+  nh->declare_parameter("lane_net_path", "/home/tao/Desktop/Autonomous-Motorsports-Motion-Planning-for-the-IAC/EPSILON/src/core/playgrounds/highway_v1.0/lane_net_norm.json");
 
-  std::string vehicle_info_path = nh->get_parameter("vehicle_info_path").as_string();
-  std::string map_path = nh->get_parameter("map_path").as_string();
-  std::string lane_net_path = nh->get_parameter("lane_net_path").as_string();
+  std::string vehicle_info_path;
+  std::string map_path;
+  std::string lane_net_path;
+
+  nh->get_parameter("vehicle_info_path", vehicle_info_path);
+  nh->get_parameter("map_path", map_path);
+  nh->get_parameter("lane_net_path", lane_net_path);
 
   if (vehicle_info_path.empty()) {
     RCLCPP_ERROR(nh->get_logger(), "Failed to get parameter: vehicle_info_path");
+    RCLCPP_INFO(nh->get_logger(), "Vehicle Info Path: %s", vehicle_info_path.c_str());
     return -1;
   }
 
   if (map_path.empty()) {
     RCLCPP_ERROR(nh->get_logger(), "Failed to get parameter: map_path");
+    RCLCPP_INFO(nh->get_logger(), "Map Path: %s", map_path.c_str());
     return -1;
   }
 
   if (lane_net_path.empty()) {
     RCLCPP_ERROR(nh->get_logger(), "Failed to get parameter: lane_net_path");
+    RCLCPP_INFO(nh->get_logger(), "Lane Net Path: %s", lane_net_path.c_str());
     return -1;
   }
 

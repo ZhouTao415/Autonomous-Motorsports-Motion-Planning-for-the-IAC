@@ -1,5 +1,5 @@
 Panels:
-  - Class: rviz/Displays
+  - Class: rviz_common/Displays
     Help Height: 78
     Name: Displays
     Property Tree Widget:
@@ -13,33 +13,33 @@ Panels:
         - /AgentDebug1/Vehicles1
       Splitter Ratio: 0.639535
     Tree Height: 843
-  - Class: rviz/Selection
+  - Class: rviz_common/Selection
     Name: Selection
-  - Class: rviz/Tool Properties
+  - Class: rviz_default_plugins/ToolProperties
     Expanded:
       - /2D Pose Estimate1
       - /2D Nav Goal1
       - /Publish Point1
     Name: Tool Properties
     Splitter Ratio: 0.588679
-  - Class: rviz/Views
+  - Class: rviz_common/Views
     Expanded:
       - /Current View1
     Name: Views
     Splitter Ratio: 0.5
-  - Class: rviz/Time
+  - Class: rviz_common/Time
     Experimental: false
     Name: Time
     SyncMode: 1
     SyncSource: ""
-  - Class: rviz/Help
+  - Class: rviz_common/Help
     Name: Help
-  - Class: rviz/Help
+  - Class: rviz_common/Help
     Name: Help
 Visualization Manager:
   Class: ""
   Displays:
-    - Class: rviz/TF
+    - Class: rviz_default_plugins/TF
       Enabled: false
       Frame Timeout: 15
       Frames:
@@ -53,7 +53,7 @@ Visualization Manager:
         {}
       Update Interval: 0
       Value: false
-    - Class: rviz/Axes
+    - Class: rviz_default_plugins/Axes
       Enabled: true
       Length: 3
       Name: Axes
@@ -62,7 +62,7 @@ Visualization Manager:
       Value: true
     - Alpha: 0.5
       Cell Size: 1
-      Class: rviz/Grid
+      Class: rviz_default_plugins/Grid
       Color: 160; 160; 164
       Enabled: false
       Line Style:
@@ -78,9 +78,9 @@ Visualization Manager:
       Plane Cell Count: 1000
       Reference Frame: <Fixed Frame>
       Value: false
-    - Class: rviz/Group
+    - Class: rviz_common/Group
       Displays:
-        - Class: rviz/MarkerArray
+        - Class: rviz_default_plugins/MarkerArray
           Enabled: true
           Marker Topic: /phy_simulator_planning_node/vis/obstacle_set_vis
           Name: ObstacleSet
@@ -88,7 +88,7 @@ Visualization Manager:
             "": true
           Queue Size: 100
           Value: true
-        - Class: rviz/MarkerArray
+        - Class: rviz_default_plugins/MarkerArray
           Enabled: true
           Marker Topic: /phy_simulator_planning_node/vis/lane_net_vis
           Name: LaneSet
@@ -96,7 +96,7 @@ Visualization Manager:
             "": true
           Queue Size: 100
           Value: true
-        - Class: rviz/MarkerArray
+        - Class: rviz_default_plugins/MarkerArray
           Enabled: false
           Marker Topic: /phy_simulator_planning_node/vis/vehicle_path_set_vis
           Name: VehiclePathSet
@@ -104,7 +104,7 @@ Visualization Manager:
             {}
           Queue Size: 100
           Value: false
-        - Class: rviz/MarkerArray
+        - Class: rviz_default_plugins/MarkerArray
           Enabled: false
           Marker Topic: /phy_simulator_planning_node/vis/vehicle_set_vis
           Name: VehicleSet
@@ -114,10 +114,10 @@ Visualization Manager:
           Value: false
       Enabled: true
       Name: ArenaInfo
-    - Class: rviz/Group
+    - Class: rviz_common/Group
       Displays:
         - Alpha: 0.8
-          Class: rviz/Map
+          Class: rviz_default_plugins/Map
           Color Scheme: costmap
           Draw Behind: true
           Enabled: false
@@ -125,7 +125,7 @@ Visualization Manager:
           Topic: /vis/agent_0/obstacle_map
           Unreliable: false
           Value: false
-        - Class: rviz/MarkerArray
+        - Class: rviz_default_plugins/MarkerArray
           Enabled: true
           Marker Topic: /vis/agent_0/ego_vehicle_vis
           Name: EgoVehicle
@@ -133,7 +133,7 @@ Visualization Manager:
             "": true
           Queue Size: 1
           Value: true
-        - Class: rviz/MarkerArray
+        - Class: rviz_default_plugins/MarkerArray
           Enabled: true
           Marker Topic: /vis/agent_0/ego_behavior_vis
           Name: EgoBehavior
@@ -141,7 +141,7 @@ Visualization Manager:
             "": true
           Queue Size: 100
           Value: true
-        - Class: rviz/MarkerArray
+        - Class: rviz_default_plugins/MarkerArray
           Enabled: false
           Marker Topic: /vis/agent_0/pred_traj_openloop_vis
           Name: PredTrajOpenloop
@@ -149,7 +149,7 @@ Visualization Manager:
             {}
           Queue Size: 1
           Value: false
-        - Class: rviz/MarkerArray
+        - Class: rviz_default_plugins/MarkerArray
           Enabled: true
           Marker Topic: /vis/agent_0/pred_initial_intention_vis
           Name: PredInitialIntention
@@ -157,7 +157,7 @@ Visualization Manager:
             "": true
           Queue Size: 1
           Value: true
-        - Class: rviz/MarkerArray
+        - Class: rviz_default_plugins/MarkerArray
           Enabled: true
           Marker Topic: /vis/agent_0/surrounding_lane_net_vis
           Name: SurroundingLaneNet
@@ -165,7 +165,7 @@ Visualization Manager:
             "": true
           Queue Size: 100
           Value: true
-        - Class: rviz/MarkerArray
+        - Class: rviz_default_plugins/MarkerArray
           Enabled: true
           Marker Topic: /vis/agent_0/local_lanes_vis
           Name: LocalLanes
@@ -173,7 +173,7 @@ Visualization Manager:
             {}
           Queue Size: 100
           Value: true
-        - Class: rviz/MarkerArray
+        - Class: rviz_default_plugins/MarkerArray
           Enabled: true
           Marker Topic: /vis/agent_0/forward_trajs
           Name: ForwardSimTrajs
@@ -181,7 +181,7 @@ Visualization Manager:
             "": true
           Queue Size: 100
           Value: true
-        - Class: rviz/MarkerArray
+        - Class: rviz_default_plugins/MarkerArray
           Enabled: true
           Marker Topic: /vis/agent_0/surrounding_vehicle_vis
           Name: SurroundingVehicles
@@ -189,7 +189,7 @@ Visualization Manager:
             "": true
           Queue Size: 1
           Value: true
-        - Class: rviz/MarkerArray
+        - Class: rviz_default_plugins/MarkerArray
           Enabled: true
           Marker Topic: /vis/agent_0/speed_limit
           Name: SpeedLimit
@@ -197,7 +197,7 @@ Visualization Manager:
             {}
           Queue Size: 100
           Value: true
-        - Class: rviz/MarkerArray
+        - Class: rviz_default_plugins/MarkerArray
           Enabled: true
           Marker Topic: /vis/agent_0/ssc/exec_traj
           Name: SscTraj
@@ -205,7 +205,7 @@ Visualization Manager:
             "": true
           Queue Size: 100
           Value: true
-        - Class: rviz/MarkerArray
+        - Class: rviz_default_plugins/MarkerArray
           Enabled: true
           Marker Topic: /vis/agent_0/rss_status
           Name: RssStatus
@@ -213,7 +213,7 @@ Visualization Manager:
             {}
           Queue Size: 100
           Value: true
-        - Class: rviz/MarkerArray
+        - Class: rviz_default_plugins/MarkerArray
           Enabled: false
           Marker Topic: /vis/agent_0/predicted_lat_intention
           Name: UncertainBehavior
@@ -221,7 +221,7 @@ Visualization Manager:
             {}
           Queue Size: 100
           Value: false
-        - Class: rviz/MarkerArray
+        - Class: rviz_default_plugins/MarkerArray
           Enabled: true
           Marker Topic: /vis/agent_0/critical_agent_trajs
           Name: CriticalAgentTraj
@@ -229,7 +229,7 @@ Visualization Manager:
             {}
           Queue Size: 100
           Value: true
-        - Class: rviz/MarkerArray
+        - Class: rviz_default_plugins/MarkerArray
           Enabled: true
           Marker Topic: /vis/agent_0/critical_ego_trajs
           Name: CriticalEgoTraj
@@ -239,9 +239,9 @@ Visualization Manager:
           Value: true
       Enabled: true
       Name: Agent_0
-    - Class: rviz/Group
+    - Class: rviz_common/Group
       Displays:
-        - Class: rviz/MarkerArray
+        - Class: rviz_default_plugins/MarkerArray
           Enabled: false
           Marker Topic: /vis/agent_9/ego_vehicle_vis
           Name: EgoVehicle
@@ -249,7 +249,7 @@ Visualization Manager:
             {}
           Queue Size: 1
           Value: false
-        - Class: rviz/MarkerArray
+        - Class: rviz_default_plugins/MarkerArray
           Enabled: true
           Marker Topic: /onlane_ai_agent_with_ctx_0/ctx_test
           Name: DesiredGapInfo
@@ -257,7 +257,7 @@ Visualization Manager:
             {}
           Queue Size: 100
           Value: true
-        - Class: rviz/MarkerArray
+        - Class: rviz_default_plugins/MarkerArray
           Enabled: false
           Marker Topic: /vis/agent_9/ego_behavior_vis
           Name: Behavior
@@ -265,7 +265,7 @@ Visualization Manager:
             {}
           Queue Size: 1
           Value: false
-        - Class: rviz/MarkerArray
+        - Class: rviz_default_plugins/MarkerArray
           Enabled: false
           Marker Topic: /vis/agent_9/surrounding_vehicle_vis
           Name: Vehicles
@@ -282,23 +282,23 @@ Visualization Manager:
     Frame Rate: 30
   Name: root
   Tools:
-    - Class: rviz/Interact
+    - Class: rviz_default_plugins/Interact
       Hide Inactive Objects: true
-    - Class: rviz/MoveCamera
-    - Class: rviz/Select
-    - Class: rviz/FocusCamera
-    - Class: rviz/Measure
-    - Class: rviz/SetInitialPose
+    - Class: rviz_default_plugins/MoveCamera
+    - Class: rviz_default_plugins/Select
+    - Class: rviz_default_plugins/FocusCamera
+    - Class: rviz_default_plugins/Measure
+    - Class: rviz_default_plugins/SetInitialPose
       Topic: /initialpose
-    - Class: rviz/SetGoal
+    - Class: rviz_default_plugins/SetGoal
       Topic: /move_base_simple/goal
-    - Class: rviz/PublishPoint
+    - Class: rviz_default_plugins/PublishPoint
       Single click: true
       Topic: /clicked_point
   Value: true
   Views:
     Current:
-      Class: rviz/ThirdPersonFollower
+      Class: rviz_default_plugins/ThirdPersonFollower
       Distance: 114.414
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.06
