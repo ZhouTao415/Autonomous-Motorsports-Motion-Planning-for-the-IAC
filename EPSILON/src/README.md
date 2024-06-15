@@ -101,19 +101,19 @@ We recommend the users create an empty workspace. Clone the repo and build:
 ## Just have a try!
 1. Open a new terminal window and start roscore:
 ```
-roscore
+
 ```
 
 2. Launch RViz with `.rviz` file:
 ```
-roscd phy_simulator/rviz/
-rviz -d phy_simulator_planning.rviz
+cd EPSILON/src/core/phy_simulator/rviz/
+ros2 run rviz2 rviz2 --display-config phy_simulator_planning.rviz 
 ```
 
 3. Launch the planner's node and AI nodes:
 ```
-roslaunch planning_integrated test_ssc_with_eudm_ros.launch
-roslaunch ai_agent_planner onlane_ai_agent.launch
+ros2 launch planning_integrated test_ssc_with_eudm_ros
+ros2 launch ai_agent_planner onlane_ai_agent_launch.py
 ```
 
 4. Launch the simulator:
