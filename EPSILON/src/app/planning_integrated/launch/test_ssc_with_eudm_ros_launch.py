@@ -3,14 +3,14 @@ from launch_ros.actions import Node
 from launch.actions import DeclareLaunchArgument, LogInfo
 from ament_index_python.packages import get_package_share_directory
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
-from launch.actions import IncludeLaunchDescription
 
 def generate_launch_description():
+    # Declare launch arguments
     arena_info_static_topic = DeclareLaunchArgument(
-        'arena_info_static_topic', default_value='/arena_info_static'
+        'arena_info_static_topic', default_value='/planning_integrated/arena_info_static'
     )
     arena_info_dynamic_topic = DeclareLaunchArgument(
-        'arena_info_dynamic_topic', default_value='/arena_info_dynamic'
+        'arena_info_dynamic_topic', default_value='/planning_integrated/arena_info_dynamic'
     )
     ctrl_topic = DeclareLaunchArgument(
         'ctrl_topic', default_value='/ctrl/agent_0'
@@ -18,11 +18,12 @@ def generate_launch_description():
     playground = DeclareLaunchArgument(
         'playground', default_value='highway_v1.0'
     )
-    
-    node = Node(
+
+    # Define the nodes to be launched
+    test_ssc_with_eudm_node = Node(
         package='planning_integrated',
         executable='test_ssc_with_eudm',
-        name='test_ssc_with_eudm_0',
+        name='test_ssc_with_eudm',
         output='screen',
         parameters=[{
             'ego_id': 0,
@@ -44,14 +45,13 @@ def generate_launch_description():
                 'ssc_config.pb.txt'
             ])
         }],
-        
         remappings=[
-            ('/planning_integrated/arena_info_static', LaunchConfiguration('arena_info_static_topic')),
-            ('/planning_integrated/arena_info_dynamic', LaunchConfiguration('arena_info_dynamic_topic')),
-            ('/planning_integrated/ctrl', LaunchConfiguration('ctrl_topic'))
+            ('/arena_info_static', LaunchConfiguration('arena_info_static_topic')),
+            ('/arena_info_dynamic', LaunchConfiguration('arena_info_dynamic_topic')),
+            ('/ctrl', LaunchConfiguration('ctrl_topic'))
         ]
     )
-    
+
     return LaunchDescription([
         arena_info_static_topic,
         arena_info_dynamic_topic,
@@ -62,5 +62,5 @@ def generate_launch_description():
         LogInfo(msg=['ctrl_topic: ', LaunchConfiguration('ctrl_topic')]),
         LogInfo(msg=['playground: ', LaunchConfiguration('playground')]),
         LogInfo(msg="Launching node..."),
-        node
+        test_ssc_with_eudm_node
     ])

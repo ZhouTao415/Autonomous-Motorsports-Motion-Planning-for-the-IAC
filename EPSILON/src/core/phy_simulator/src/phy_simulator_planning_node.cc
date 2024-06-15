@@ -51,58 +51,41 @@ void NavGoalCallback(const geometry_msgs::msg::PoseStamped::SharedPtr msg) {
 
 int main(int argc, char** argv) {
   rclcpp::init(argc, argv);
-  auto nh = rclcpp::Node::make_shared("phy_simulator_planning_node");
+  auto node = rclcpp::Node::make_shared("phy_simulator_planning_node");
 
-  nh->declare_parameter("vehicle_info_path", "/home/tao/Desktop/Autonomous-Motorsports-Motion-Planning-for-the-IAC/EPSILON/src/core/playgrounds/highway_v1.0/vehicle_set.json");
-  nh->declare_parameter("map_path", "/home/tao/Desktop/Autonomous-Motorsports-Motion-Planning-for-the-IAC/EPSILON/src/core/playgrounds/highway_v1.0/obstacles_norm.json");
-  nh->declare_parameter("lane_net_path", "/home/tao/Desktop/Autonomous-Motorsports-Motion-Planning-for-the-IAC/EPSILON/src/core/playgrounds/highway_v1.0/lane_net_norm.json");
+  node->declare_parameter<std::string>("vehicle_info_path", "/home/tao/Desktop/Autonomous-Motorsports-Motion-Planning-for-the-IAC/EPSILON/src/core/playgrounds/highway_v1.0/vehicle_set.json");
+  node->declare_parameter<std::string>("map_path", "/home/tao/Desktop/Autonomous-Motorsports-Motion-Planning-for-the-IAC/EPSILON/src/core/playgrounds/highway_v1.0/obstacles_norm.json");
+  node->declare_parameter<std::string>("lane_net_path", "/home/tao/Desktop/Autonomous-Motorsports-Motion-Planning-for-the-IAC/EPSILON/src/core/playgrounds/highway_v1.0/lane_net_norm.json");
 
   std::string vehicle_info_path;
   std::string map_path;
   std::string lane_net_path;
 
-  nh->get_parameter("vehicle_info_path", vehicle_info_path);
-  nh->get_parameter("map_path", map_path);
-  nh->get_parameter("lane_net_path", lane_net_path);
-
-  if (vehicle_info_path.empty()) {
-    RCLCPP_ERROR(nh->get_logger(), "Failed to get parameter: vehicle_info_path");
-    RCLCPP_INFO(nh->get_logger(), "Vehicle Info Path: %s", vehicle_info_path.c_str());
-    return -1;
+  if (!node->get_parameter("vehicle_info_path", vehicle_info_path)) {
+    RCLCPP_ERROR(node->get_logger(), "Failed to get parameter: vehicle_info_path");
+  } else {
+    RCLCPP_INFO(node->get_logger(), "vehicle_info_path: %s", vehicle_info_path.c_str());
   }
 
-  if (map_path.empty()) {
-    RCLCPP_ERROR(nh->get_logger(), "Failed to get parameter: map_path");
-    RCLCPP_INFO(nh->get_logger(), "Map Path: %s", map_path.c_str());
-    return -1;
+  if (!node->get_parameter("map_path", map_path)) {
+    RCLCPP_ERROR(node->get_logger(), "Failed to get parameter: map_path");
+  } else {
+    RCLCPP_INFO(node->get_logger(), "map_path: %s", map_path.c_str());
   }
 
-  if (lane_net_path.empty()) {
-    RCLCPP_ERROR(nh->get_logger(), "Failed to get parameter: lane_net_path");
-    RCLCPP_INFO(nh->get_logger(), "Lane Net Path: %s", lane_net_path.c_str());
-    return -1;
+  if (!node->get_parameter("lane_net_path", lane_net_path)) {
+    RCLCPP_ERROR(node->get_logger(), "Failed to get parameter: lane_net_path");
+  } else {
+    RCLCPP_INFO(node->get_logger(), "lane_net_path: %s", lane_net_path.c_str());
   }
 
-  RCLCPP_INFO(nh->get_logger(), "Vehicle Info Path: %s", vehicle_info_path.c_str());
-  RCLCPP_INFO(nh->get_logger(), "Map Path: %s", map_path.c_str());
-  RCLCPP_INFO(nh->get_logger(), "Lane Net Path: %s", lane_net_path.c_str());
+  PhySimulation phy_sim(vehicle_info_path, map_path, lane_net_path);
 
-  PhySimulation phy_sim;
-  try {
-    phy_sim = PhySimulation(vehicle_info_path, map_path, lane_net_path);
-  } catch (const nlohmann::json::parse_error& e) {
-    RCLCPP_ERROR(nh->get_logger(), "JSON parse error: %s", e.what());
-    return -1;
-  } catch (const std::exception& e) {
-    RCLCPP_ERROR(nh->get_logger(), "Exception: %s", e.what());
-    return -1;
-  }
-
-  RosAdapter ros_adapter(nh);
+  RosAdapter ros_adapter(node);
   ros_adapter.set_phy_sim(&phy_sim);
 
-  Visualizer visualizer;
-  visualizer.set_phy_sim(&phy_sim);
+  auto visualizer = std::make_shared<Visualizer>(node);
+  visualizer->set_phy_sim(&phy_sim);
 
   auto vehicle_ids = phy_sim.vehicle_ids();
   int num_vehicles = static_cast<int>(vehicle_ids.size());
@@ -112,7 +95,7 @@ int main(int argc, char** argv) {
     auto vehicle_id = vehicle_ids[i];
     std::string topic_name = std::string("/ctrl/agent_") + std::to_string(vehicle_id);
     printf("subscribing to %s\n", topic_name.c_str());
-    _ros_sub[i] = nh->create_subscription<vehicle_msgs::msg::ControlSignal>(
+    _ros_sub[i] = node->create_subscription<vehicle_msgs::msg::ControlSignal>(
         topic_name, 10, [vehicle_id](const vehicle_msgs::msg::ControlSignal::SharedPtr msg) {
           CtrlSignalCallback(msg, vehicle_id);
         });
@@ -120,28 +103,28 @@ int main(int argc, char** argv) {
 
   for (auto& vehicle_id : vehicle_ids) {
     common::VehicleControlSignal default_signal;
-    _signal_set.signal_set.insert(std::pair<int, common::VehicleControlSignal>(
-        vehicle_id, default_signal));
+    _signal_set.signal_set.insert(std::make_pair(vehicle_id, default_signal));
   }
 
-  auto ini_pos_sub = nh->create_subscription<geometry_msgs::msg::PoseWithCovarianceStamped>(
+  auto ini_pos_sub = node->create_subscription<geometry_msgs::msg::PoseWithCovarianceStamped>(
       "/initialpose", 10, InitialPoseCallback);
-  auto goal_pos_sub = nh->create_subscription<geometry_msgs::msg::PoseStamped>(
+  auto goal_pos_sub = node->create_subscription<geometry_msgs::msg::PoseStamped>(
       "/move_base_simple/goal", 10, NavGoalCallback);
 
   rclcpp::Rate rate(simulation_rate);
-  rclcpp::Time next_gt_pub_time = rclcpp::Clock(RCL_ROS_TIME).now();
+  rclcpp::Time next_gt_pub_time = node->now();
   rclcpp::Time next_gt_static_pub_time = next_gt_pub_time;
-  rclcpp::Time next_vis_pub_time = rclcpp::Clock(RCL_ROS_TIME).now();
+  rclcpp::Time next_vis_pub_time = node->now();
 
   std::cout << "[PhySimulation] Initialization finished, waiting for callback" << std::endl;
 
+  int gt_msg_counter = 0;
   while (rclcpp::ok()) {
-    rclcpp::spin_some(nh);
+    rclcpp::spin_some(node);
 
     phy_sim.UpdateSimulatorUsingSignalSet(_signal_set, 1.0 / simulation_rate);
 
-    rclcpp::Time tnow = rclcpp::Clock(RCL_ROS_TIME).now();
+    rclcpp::Time tnow = node->now();
     if (tnow >= next_gt_pub_time) {
       next_gt_pub_time += rclcpp::Duration::from_seconds(1.0 / gt_msg_rate);
       ros_adapter.PublishDynamicDataWithStamp(tnow);
@@ -154,7 +137,7 @@ int main(int argc, char** argv) {
 
     if (tnow >= next_vis_pub_time) {
       next_vis_pub_time += rclcpp::Duration::from_seconds(1.0 / visualization_msg_rate);
-      visualizer.VisualizeDataWithStamp(tnow);
+      visualizer->VisualizeDataWithStamp(tnow);
     }
 
     rate.sleep();

@@ -84,7 +84,7 @@ void RandomBehavior() {
 }
 
 void PublishControl() {
-  RCLCPP_INFO(rclcpp::get_logger("onlane_ai_agent"), "PublishControl called");
+  // RCLCPP_INFO(rclcpp::get_logger("onlane_ai_agent"), "PublishControl called");
   if (!has_init_state || !p_bp_server_ || !p_ctrl_input_smm_buff_) return;
 
   bool is_map_updated = false;

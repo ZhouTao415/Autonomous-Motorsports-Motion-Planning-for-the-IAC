@@ -1,10 +1,3 @@
-/**
- * @file visualizer.h
- * @brief
- * @version 0.1
- * @date 2019-03-20
- *
- */
 #ifndef _CORE_SEMANTIC_MAP_INC_PHY_SIMULATOR_VISUALIZER_H_
 #define _CORE_SEMANTIC_MAP_INC_PHY_SIMULATOR_VISUALIZER_H_
 
@@ -27,6 +20,7 @@ namespace phy_simulator {
 class Visualizer : public rclcpp::Node {
  public:
   Visualizer();
+  explicit Visualizer(const std::shared_ptr<rclcpp::Node>& node);
   ~Visualizer() {}
 
   void set_phy_sim(PhySimulation *p_phy_sim) { p_phy_sim_ = p_phy_sim; }

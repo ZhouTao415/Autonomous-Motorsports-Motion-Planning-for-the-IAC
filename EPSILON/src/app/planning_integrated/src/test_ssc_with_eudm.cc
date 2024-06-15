@@ -35,6 +35,9 @@ int main(int argc, char** argv) {
   node->declare_parameter<std::string>("agent_config_path", "/home/tao/Desktop/Autonomous-Motorsports-Motion-Planning-for-the-IAC/EPSILON/src/core/playgrounds/highway_v1.0/agent_config.json");
   node->declare_parameter<std::string>("bp_config_path", "/home/tao/Desktop/Autonomous-Motorsports-Motion-Planning-for-the-IAC/EPSILON/src/util/eudm_planner/config/eudm_config.pb.txt");
   node->declare_parameter<std::string>("ssc_config_path", "/home/tao/Desktop/Autonomous-Motorsports-Motion-Planning-for-the-IAC/EPSILON/src/util/ssc_planner/config/ssc_config.pb.txt");
+  // node->declare_parameter<std::string>("agent_config_path", " ");
+  // node->declare_parameter<std::string>("bp_config_path", " ");
+  // node->declare_parameter<std::string>("ssc_config_path", " ");
   node->declare_parameter<double>("desired_vel", 6.0);
   node->declare_parameter<bool>("use_sim_state", true);
 

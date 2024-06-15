@@ -14,6 +14,18 @@ Visualizer::Visualizer()
       this->create_publisher<visualization_msgs::msg::MarkerArray>("vis/obstacle_set_vis", 10);
 }
 
+Visualizer::Visualizer(const std::shared_ptr<rclcpp::Node>& node)
+: Node("visualizer"),
+  tf_broadcaster_(this),
+  clock_(std::make_shared<rclcpp::Clock>(RCL_ROS_TIME)) {
+  vehicle_set_pub_ =
+      this->create_publisher<visualization_msgs::msg::MarkerArray>("vis/vehicle_set_vis", 10);
+  lane_net_pub_ =
+      this->create_publisher<visualization_msgs::msg::MarkerArray>("vis/lane_net_vis", 10);
+  obstacle_set_pub_ =
+      this->create_publisher<visualization_msgs::msg::MarkerArray>("vis/obstacle_set_vis", 10);
+}
+
 void Visualizer::VisualizeData() {
   auto time_stamp = clock_->now();
   VisualizeDataWithStamp(time_stamp);

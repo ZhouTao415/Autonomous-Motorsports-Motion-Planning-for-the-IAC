@@ -38,8 +38,6 @@ add_library(phy_simulator_lib
 )
 
 target_link_libraries(phy_simulator_lib
-    # hkust_pl_vehicle_model
-    # hkust_pl_common
     dw
     ${common_LIBRARIES}
     ${vehicle_model_LIBRARIES}
@@ -53,28 +51,20 @@ add_executable(phy_simulator_planning_node
 )
 
 target_link_libraries(phy_simulator_planning_node
-    phy_simulator_lib
     dw
+    phy_simulator_lib
     ${common_LIBRARIES}
     ${vehicle_model_LIBRARIES}
     ${vehicle_msgs_LIBRARIES}
 )
 
 # Install the targets
-# install(TARGETS phy_simulator_lib phy_simulator_planning_node
-#   EXPORT export_phy_simulator
-#   LIBRARY DESTINATION lib
-#   ARCHIVE DESTINATION lib
-#   RUNTIME DESTINATION lib/${PROJECT_NAME}
-#   INCLUDES DESTINATION include
-# )
-
 install(TARGETS phy_simulator_lib phy_simulator_planning_node
-    EXPORT ${PROJECT_NAME}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIB_PREFIX}  # 动态库安装路径
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIB_PREFIX}  # 静态库安装路径
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BIN_PREFIX}  # 可执行文件安装路径
-    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDE_PREFIX}  # 头文件安装路径
+  EXPORT export_phy_simulator
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION lib/${PROJECT_NAME}
+  INCLUDES DESTINATION include
 )
 
 install(DIRECTORY include/
@@ -84,7 +74,6 @@ install(DIRECTORY include/
 install(DIRECTORY launch
   DESTINATION share/${PROJECT_NAME}
 )
-
 
 # Exporting and installation setups
 ament_export_libraries(phy_simulator_lib)
