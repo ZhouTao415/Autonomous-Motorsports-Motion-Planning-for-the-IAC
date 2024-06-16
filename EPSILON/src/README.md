@@ -99,26 +99,22 @@ We recommend the users create an empty workspace. Clone the repo and build:
 ```
 
 ## Just have a try!
-1. Open a new terminal window and start roscore:
-```
 
-```
-
-2. Launch RViz with `.rviz` file:
+1. Launch RViz with `.rviz` file:
 ```
 cd EPSILON/src/core/phy_simulator/rviz/
 ros2 run rviz2 rviz2 --display-config phy_simulator_planning.rviz 
 ```
 
-3. Launch the planner's node and AI nodes:
+2. Launch the planner's node and AI nodes:
 ```
 ros2 launch planning_integrated test_ssc_with_eudm_ros_launch.py
 ros2 launch ai_agent_planner onlane_ai_agent_launch.py
 ```
 
-4. Launch the simulator:
+3. Launch the simulator:
 ```
-roslaunch phy_simulator phy_simulator_planning.launch
+ros2 launch phy_simulator phy_simulator_planning_launch.py
 ```
 Note that the simulator should be launched last.
 
@@ -127,10 +123,10 @@ Note that the simulator should be launched last.
 </p>
 
 
-5. We provide a simple interface for controlling the behavior of the agents:
+4. We provide a simple interface for controlling the behavior of the agents:
 ```
-roscd aux_tools/src/
-python terminal_server.py
+cd aux_tools/src/
+python3 terminal_server.py
 ```
 
 <p align="center">

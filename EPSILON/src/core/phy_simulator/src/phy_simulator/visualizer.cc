@@ -1,33 +1,20 @@
 #include "phy_simulator/visualizer.h"
 
+#include <tf2_ros/transform_broadcaster.h>
+
 namespace phy_simulator {
 
-Visualizer::Visualizer()
-: Node("visualizer"),
-  tf_broadcaster_(this),
-  clock_(std::make_shared<rclcpp::Clock>(RCL_ROS_TIME)) {
+Visualizer::Visualizer(rclcpp::Node::SharedPtr node) : node_(node) {
   vehicle_set_pub_ =
-      this->create_publisher<visualization_msgs::msg::MarkerArray>("vis/vehicle_set_vis", 10);
+      node_->create_publisher<visualization_msgs::msg::MarkerArray>("/phy_simulator_planning_node/vis/vehicle_set_vis", 10);
   lane_net_pub_ =
-      this->create_publisher<visualization_msgs::msg::MarkerArray>("vis/lane_net_vis", 10);
-  obstacle_set_pub_ =
-      this->create_publisher<visualization_msgs::msg::MarkerArray>("vis/obstacle_set_vis", 10);
-}
-
-Visualizer::Visualizer(const std::shared_ptr<rclcpp::Node>& node)
-: Node("visualizer"),
-  tf_broadcaster_(this),
-  clock_(std::make_shared<rclcpp::Clock>(RCL_ROS_TIME)) {
-  vehicle_set_pub_ =
-      this->create_publisher<visualization_msgs::msg::MarkerArray>("vis/vehicle_set_vis", 10);
-  lane_net_pub_ =
-      this->create_publisher<visualization_msgs::msg::MarkerArray>("vis/lane_net_vis", 10);
-  obstacle_set_pub_ =
-      this->create_publisher<visualization_msgs::msg::MarkerArray>("vis/obstacle_set_vis", 10);
+      node_->create_publisher<visualization_msgs::msg::MarkerArray>("/phy_simulator_planning_node/vis/lane_net_vis", 10);
+  obstacle_set_pub_ = node_->create_publisher<visualization_msgs::msg::MarkerArray>(
+      "/phy_simulator_planning_node/vis/obstacle_set_vis", 10);
 }
 
 void Visualizer::VisualizeData() {
-  auto time_stamp = clock_->now();
+  auto time_stamp = node_->now();
   VisualizeDataWithStamp(time_stamp);
   // SendTfWithStamp(time_stamp);
 }
@@ -37,28 +24,6 @@ void Visualizer::VisualizeDataWithStamp(const rclcpp::Time &stamp) {
   VisualizeLaneNet(stamp, p_phy_sim_->lane_net());
   VisualizeObstacleSet(stamp, p_phy_sim_->obstacle_set());
 }
-
-// void Visualizer::SendTfWithStamp(const rclcpp::Time &stamp) {
-//   auto vehicle_set = p_phy_sim_->vehicle_set();
-//   for (auto iter = vehicle_set.vehicles.begin();
-//        iter != vehicle_set.vehicles.end(); ++iter) {
-//     geometry_msgs::msg::TransformStamped transformStamped;
-
-//     Vec3f state = iter->second.Ret3DofState();
-//     geometry_msgs::msg::Pose pose;
-//     common::VisualizationUtil::GetRosPoseFrom3DofState(state, &pose);
-
-//     transformStamped.header.stamp = stamp;
-//     transformStamped.header.frame_id = "map";
-//     transformStamped.child_frame_id = "body_" + std::to_string(iter->first);
-//     transformStamped.transform.translation.x = pose.position.x;
-//     transformStamped.transform.translation.y = pose.position.y;
-//     transformStamped.transform.translation.z = pose.position.z;
-//     transformStamped.transform.rotation = pose.orientation;
-
-//     tf_broadcaster_.sendTransform(transformStamped);
-//   }
-// }
 
 void Visualizer::VisualizeVehicleSet(const rclcpp::Time &stamp,
                                      const common::VehicleSet &vehicle_set) {
@@ -72,7 +37,6 @@ void Visualizer::VisualizeVehicleSet(const rclcpp::Time &stamp,
         iter->second, common::ColorARGB(1, 1, 0, 0), color_vel_vec, color_steer,
         7 * iter->first, &vehicle_marker);
   }
-  // SendTfWithStamp(stamp);
   common::VisualizationUtil::FillStampInMarkerArray(stamp, &vehicle_marker);
   vehicle_set_pub_->publish(vehicle_marker);
 }
@@ -84,7 +48,6 @@ void Visualizer::VisualizeLaneNet(const rclcpp::Time &stamp,
   for (auto iter = lane_net.lane_set.begin(); iter != lane_net.lane_set.end();
        ++iter) {
     visualization_msgs::msg::Marker lane_marker;
-    // common::ColorARGB(1.0, 0.0, 1.0, 1.0)
     common::VisualizationUtil::GetRosMarkerLineStripUsing2DofVec(
         iter->second.lane_points, common::cmap.at("sky blue"),
         Vec3f(0.1, 0.1, 0.1), iter->second.id, &lane_marker);
@@ -92,7 +55,6 @@ void Visualizer::VisualizeLaneNet(const rclcpp::Time &stamp,
     lane_marker.header.frame_id = "map";
     lane_marker.id = id_cnt++;
     lane_net_marker.markers.push_back(lane_marker);
-    // Visualize the start and end point
     visualization_msgs::msg::Marker start_point_marker, end_point_marker,
         lane_id_text_marker;
     {

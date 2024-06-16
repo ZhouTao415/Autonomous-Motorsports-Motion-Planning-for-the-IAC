@@ -17,10 +17,10 @@
 
 namespace phy_simulator {
 
-class Visualizer : public rclcpp::Node {
+class Visualizer {
  public:
-  Visualizer();
-  explicit Visualizer(const std::shared_ptr<rclcpp::Node>& node);
+  Visualizer() {}
+  Visualizer(rclcpp::Node::SharedPtr node);
   ~Visualizer() {}
 
   void set_phy_sim(PhySimulation *p_phy_sim) { p_phy_sim_ = p_phy_sim; }
@@ -37,12 +37,11 @@ class Visualizer : public rclcpp::Node {
   void VisualizeObstacleSet(const rclcpp::Time &stamp,
                             const common::ObstacleSet &Obstacle_set);
 
+  rclcpp::Node::SharedPtr node_;
+
   rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr vehicle_set_pub_;
   rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr lane_net_pub_;
   rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr obstacle_set_pub_;
-
-  tf2_ros::TransformBroadcaster tf_broadcaster_;
-  rclcpp::Clock::SharedPtr clock_;
 
   PhySimulation *p_phy_sim_;
 };  // Visualizer

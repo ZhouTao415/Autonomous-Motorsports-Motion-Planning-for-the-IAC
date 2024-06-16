@@ -84,8 +84,8 @@ int main(int argc, char** argv) {
   RosAdapter ros_adapter(node);
   ros_adapter.set_phy_sim(&phy_sim);
 
-  auto visualizer = std::make_shared<Visualizer>(node);
-  visualizer->set_phy_sim(&phy_sim);
+  Visualizer visualizer(node);
+  visualizer.set_phy_sim(&phy_sim);
 
   auto vehicle_ids = phy_sim.vehicle_ids();
   int num_vehicles = static_cast<int>(vehicle_ids.size());
@@ -118,7 +118,7 @@ int main(int argc, char** argv) {
 
   std::cout << "[PhySimulation] Initialization finished, waiting for callback" << std::endl;
 
-  int gt_msg_counter = 0;
+  // int gt_msg_counter = 0;
   while (rclcpp::ok()) {
     rclcpp::spin_some(node);
 
@@ -137,7 +137,7 @@ int main(int argc, char** argv) {
 
     if (tnow >= next_vis_pub_time) {
       next_vis_pub_time += rclcpp::Duration::from_seconds(1.0 / visualization_msg_rate);
-      visualizer->VisualizeDataWithStamp(tnow);
+      visualizer.VisualizeDataWithStamp(tnow);
     }
 
     rate.sleep();
