@@ -2,39 +2,54 @@
 
 namespace semantic_map_manager {
 
-Visualizer::Visualizer(rclcpp::NodeOptions options, int node_id)
-    : Node("visualizer", options), node_id_(node_id) {
+Visualizer::Visualizer(rclcpp::Node::SharedPtr node, int node_id)
+    : node_(node), node_id_(node_id), ego_to_map_tf_(node) {
   ego_tf_name_ = "ego_vehicle_vis_" + std::to_string(node_id_);
 
-  RCLCPP_INFO(this->get_logger(), "node_id_ = %d", node_id_);
-  RCLCPP_INFO(this->get_logger(), "ego_tf_name_ = %s", ego_tf_name_.c_str());
+  std::cout << "node_id_ = " << node_id_ << std::endl;
+  std::cout << "ego_tf_name_ = " << ego_tf_name_ << std::endl;
 
-  std::string ego_vehicle_vis_topic = "/vis/agent_" + std::to_string(node_id_) + "/ego_vehicle_vis";
-  std::string obstacle_map_vis_topic = "/vis/agent_" + std::to_string(node_id_) + "/obstacle_map";
-  std::string surrounding_lane_net_vis_topic = "/vis/agent_" + std::to_string(node_id_) + "/surrounding_lane_net_vis";
-  std::string local_lanes_vis_topic = "/vis/agent_" + std::to_string(node_id_) + "/local_lanes_vis";
-  std::string ego_vehicle_behavior_topic = "/vis/agent_" + std::to_string(node_id_) + "/ego_behavior_vis";
-  std::string pred_intention_topic = "/vis/agent_" + std::to_string(node_id_) + "/pred_initial_intention_vis";
-  std::string pred_traj_openloop_topic = "/vis/agent_" + std::to_string(node_id_) + "/pred_traj_openloop_vis";
-  std::string surrounding_vehicle_topic = "/vis/agent_" + std::to_string(node_id_) + "/surrounding_vehicle_vis";
-  std::string speed_limit_topic = "/vis/agent_" + std::to_string(node_id_) + "/speed_limit";
-
-  ego_vehicle_pub_ = this->create_publisher<visualization_msgs::msg::MarkerArray>(ego_vehicle_vis_topic, 1);
-  obstacle_map_pub_ = this->create_publisher<nav_msgs::msg::OccupancyGrid>(obstacle_map_vis_topic, 1);
-  surrounding_lane_net_pub_ = this->create_publisher<visualization_msgs::msg::MarkerArray>(surrounding_lane_net_vis_topic, 1);
-  local_lanes_pub_ = this->create_publisher<visualization_msgs::msg::MarkerArray>(local_lanes_vis_topic, 1);
-  behavior_vis_pub_ = this->create_publisher<visualization_msgs::msg::MarkerArray>(ego_vehicle_behavior_topic, 1);
-  pred_traj_openloop_vis_pub_ = this->create_publisher<visualization_msgs::msg::MarkerArray>(pred_traj_openloop_topic, 1);
-  pred_intention_vis_pub_ = this->create_publisher<visualization_msgs::msg::MarkerArray>(pred_intention_topic, 1);
-  surrounding_vehicle_vis_pub_ = this->create_publisher<visualization_msgs::msg::MarkerArray>(surrounding_vehicle_topic, 1);
-  speed_limit_vis_pub_ = this->create_publisher<visualization_msgs::msg::MarkerArray>(speed_limit_topic, 1);
-
-  ego_to_map_tf_ = std::make_shared<tf2_ros::TransformBroadcaster>(this);
+  std::string ego_vehicle_vis_topic = std::string("/vis/agent_") +
+                                      std::to_string(node_id_) +
+                                      std::string("/ego_vehicle_vis");
+  std::string obstacle_map_vis_topic = std::string("/vis/agent_") +
+                                       std::to_string(node_id_) +
+                                       std::string("/obstacle_map");
+  std::string surrounding_lane_net_vis_topic =
+      std::string("/vis/agent_") + std::to_string(node_id_) +
+      std::string("/surrounding_lane_net_vis");
+  std::string local_lanes_vis_topic = std::string("/vis/agent_") +
+                                      std::to_string(node_id_) +
+                                      std::string("/local_lanes_vis");
+  std::string ego_vehicle_behavior_topic = std::string("/vis/agent_") +
+                                           std::to_string(node_id_) +
+                                           std::string("/ego_behavior_vis");
+  std::string pred_intention_topic = std::string("/vis/agent_") +
+                                     std::to_string(node_id_) +
+                                     std::string("/pred_initial_intention_vis");
+  std::string pred_traj_openloop_topic = std::string("/vis/agent_") +
+                                         std::to_string(node_id_) +
+                                         std::string("/pred_traj_openloop_vis");
+  std::string surrounding_vehicle_topic =
+      std::string("/vis/agent_") + std::to_string(node_id_) +
+      std::string("/surrounding_vehicle_vis");
+  std::string speed_limit_topic = std::string("/vis/agent_") +
+                                  std::to_string(node_id_) +
+                                  std::string("/speed_limit");
+  ego_vehicle_pub_ = node_->create_publisher<visualization_msgs::msg::MarkerArray>(ego_vehicle_vis_topic, 1);
+  obstacle_map_pub_ = node_->create_publisher<nav_msgs::msg::OccupancyGrid>(obstacle_map_vis_topic, 1);
+  surrounding_lane_net_pub_ = node_->create_publisher<visualization_msgs::msg::MarkerArray>(surrounding_lane_net_vis_topic, 1);
+  local_lanes_pub_ = node_->create_publisher<visualization_msgs::msg::MarkerArray>(local_lanes_vis_topic, 1);
+  behavior_vis_pub_ = node_->create_publisher<visualization_msgs::msg::MarkerArray>(ego_vehicle_behavior_topic, 1);
+  pred_traj_openloop_vis_pub_ = node_->create_publisher<visualization_msgs::msg::MarkerArray>(pred_traj_openloop_topic, 1);
+  pred_intention_vis_pub_ = node_->create_publisher<visualization_msgs::msg::MarkerArray>(pred_intention_topic, 1);
+  surrounding_vehicle_vis_pub_ = node_->create_publisher<visualization_msgs::msg::MarkerArray>(surrounding_vehicle_topic, 1);
+  speed_limit_vis_pub_ = node_->create_publisher<visualization_msgs::msg::MarkerArray>(speed_limit_topic, 1);
 }
 
 void Visualizer::VisualizeData(const SemanticMapManager &smm) {
   if (smm.time_stamp() < kEPS) return;  // if time stamp unset, return
-  auto time_stamp = rclcpp::Time(smm.time_stamp());
+  auto time_stamp = node_->now();
   VisualizeDataWithStamp(time_stamp, smm);
   SendTfWithStamp(time_stamp, smm);
 }
@@ -119,7 +134,7 @@ void Visualizer::VisualizeObstacleMap(
   if (obstacle_map.data_size() < 1) return;
   nav_msgs::msg::OccupancyGrid occ_map;
   common::VisualizationUtil::GetRosOccupancyGridUsingGripMap2D(
-      obstacle_map, this->now(), &occ_map);
+      obstacle_map, node_->now(), &occ_map);
   occ_map.header.stamp = stamp;
   obstacle_map_pub_->publish(occ_map);
 }
@@ -127,6 +142,7 @@ void Visualizer::VisualizeObstacleMap(
 void Visualizer::SendTfWithStamp(const rclcpp::Time &stamp,
                                  const SemanticMapManager &smm) {
   if (smm.time_stamp() < kEPS) {
+    // printf("[Error]SMM timestamp is unset\n");
     return;  // if time stamp unset, return
   }
   // * Publish TF: map -> ego_vehicle
@@ -134,14 +150,16 @@ void Visualizer::SendTfWithStamp(const rclcpp::Time &stamp,
   geometry_msgs::msg::Pose pose;
   common::VisualizationUtil::GetRosPoseFrom3DofState(state, &pose);
   geometry_msgs::msg::TransformStamped transformStamped;
+
   transformStamped.header.stamp = stamp;
   transformStamped.header.frame_id = "map";
-  transformStamped.child_frame_id = ego_tf_name_;
+  transformStamped.child_frame_id = ego_tf_name_.c_str();
   transformStamped.transform.translation.x = pose.position.x;
   transformStamped.transform.translation.y = pose.position.y;
   transformStamped.transform.translation.z = pose.position.z;
   transformStamped.transform.rotation = pose.orientation;
-  ego_to_map_tf_->sendTransform(transformStamped);
+
+  ego_to_map_tf_.sendTransform(transformStamped);
 }
 
 void Visualizer::VisualizeSurroundingLaneNet(
@@ -157,6 +175,7 @@ void Visualizer::VisualizeSurroundingLaneNet(
       continue;
     }
     visualization_msgs::msg::Marker lane_marker;
+    // common::ColorARGB(1.0, 0.0, 1.0, 1.0)
     common::VisualizationUtil::GetRosMarkerLineStripUsing2DofVec(
         iter->second.lane_points, common::cmap.at("sky blue"),
         Vec3f(0.1, 0.1, 0.1), iter->second.id, &lane_marker);
@@ -251,16 +270,17 @@ void Visualizer::VisualizeSpeedLimit(
     const rclcpp::Time &stamp, const vec_E<common::SpeedLimit> &speed_limits) {
   visualization_msgs::msg::MarkerArray traffic_signal_arr;
   int id_cnt = 0;
-  double offset_len = 0;
+  decimal_t offset_len = 0;
   for (int i = 0; i < static_cast<int>(speed_limits.size()); ++i) {
-    std::string str_start = "Speed limit: ";
-    std::string str_end = "Release\n";
+    std::string str_start = std::string("Speed limit: ");
+    std::string str_end = std::string("Release\n");
 
-    common::ColorARGB start_marker_color = common::ColorARGB(1.0, 1.0, 1.0, 0.0);
+    common::ColorARGB start_marker_color =
+        common::ColorARGB(1.0, 1.0, 1.0, 0.0);
     common::ColorARGB end_marker_color = common::ColorARGB(1.0, 0.0, 1.0, 0.0);
     if (speed_limits[i].vel_range()(1) < kEPS) {
-      str_start = "Red light: ";
-      str_end = "Forbidden\n";
+      str_start = std::string("Red light: ");
+      str_end = std::string("Forbidden\n");
       start_marker_color = common::ColorARGB(1.0, 1.0, 0.0, 0.0);
       end_marker_color = common::ColorARGB(1.0, 1.0, 0.0, 0.0);
     }
@@ -268,12 +288,12 @@ void Visualizer::VisualizeSpeedLimit(
     visualization_msgs::msg::Marker start_marker;
     start_marker.header.stamp = stamp;
     start_marker.header.frame_id = "map";
-    double start_point_x = speed_limits[i].start_point()(0);
-    double start_point_y = speed_limits[i].start_point()(1);
-    double start_point_angle = speed_limits[i].start_angle();
+    decimal_t start_point_x = speed_limits[i].start_point()(0);
+    decimal_t start_point_y = speed_limits[i].start_point()(1);
+    decimal_t start_point_angle = speed_limits[i].start_angle();
 
-    double start_x = start_point_x - offset_len * cos(start_point_angle);
-    double start_y = start_point_y - offset_len * sin(start_point_angle);
+    decimal_t start_x = start_point_x - offset_len * cos(start_point_angle);
+    decimal_t start_y = start_point_y - offset_len * sin(start_point_angle);
 
     common::VisualizationUtil::GetRosMarkerMeshHexagonSignUsingPosition(
         Vec3f(start_x, start_y, start_point_angle), 1.0, start_marker_color,
@@ -283,7 +303,7 @@ void Visualizer::VisualizeSpeedLimit(
     visualization_msgs::msg::Marker start_text_marker;
     start_text_marker.header.stamp = stamp;
     start_text_marker.header.frame_id = "map";
-    str_start += std::string(common::GetStringByValueWithPrecision<double>(
+    str_start += std::string(common::GetStringByValueWithPrecision<decimal_t>(
                                  speed_limits[i].vel_range()(1), 1) +
                              "m/s");
     common::VisualizationUtil::GetRosMarkerTextUsingPositionAndString(
@@ -294,12 +314,12 @@ void Visualizer::VisualizeSpeedLimit(
     visualization_msgs::msg::Marker end_marker;
     end_marker.header.stamp = stamp;
     end_marker.header.frame_id = "map";
-    double end_point_x = speed_limits[i].end_point()(0);
-    double end_point_y = speed_limits[i].end_point()(1);
-    double end_point_angle = speed_limits[i].end_angle();
+    decimal_t end_point_x = speed_limits[i].end_point()(0);
+    decimal_t end_point_y = speed_limits[i].end_point()(1);
+    decimal_t end_point_angle = speed_limits[i].end_angle();
 
-    double end_x = end_point_x - offset_len * cos(end_point_angle);
-    double end_y = end_point_y - offset_len * sin(end_point_angle);
+    decimal_t end_x = end_point_x - offset_len * cos(end_point_angle);
+    decimal_t end_y = end_point_y - offset_len * sin(end_point_angle);
 
     common::VisualizationUtil::GetRosMarkerMeshHexagonSignUsingPosition(
         Vec3f(end_x, end_y, speed_limits[i].end_angle()), 1.0, end_marker_color,
@@ -332,15 +352,15 @@ void Visualizer::VisualizeIntentionPrediction(
     // * lateral behavior prediction
     common::State state = semantic_vehicle.vehicle.state();
     geometry_msgs::msg::Point pt0, pt1;
-    double z = 2.0;
+    decimal_t z = 2.0;
     for (const auto &entry : semantic_vehicle.probs_lat_behaviors.probs) {
       common::LateralBehavior beh = entry.first;
-      double prob = entry.second;
+      decimal_t prob = entry.second;
 
       if (prob < kEPS) continue;
 
-      double angle_offset = 0.0;
-      double length = prob * 2.0;
+      decimal_t angle_offset = 0.0;
+      decimal_t length = prob * 2.0;
 
       if (beh == common::LateralBehavior::kLaneChangeRight) {
         angle_offset = -kPi / 2.0;

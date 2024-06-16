@@ -7,18 +7,18 @@ void BehaviorPlannerServer::PushSemanticMap(const SemanticMapManager &smm) {
 }
 
 void BehaviorPlannerServer::PublishData() {
-  p_visualizer_->PublishDataWithStamp(this->get_clock()->now());
+  p_visualizer_->PublishDataWithStamp(node_->get_clock()->now());
 }
 
 void BehaviorPlannerServer::Init() {
   bp_.Init("bp");
   if (bp_.autonomous_level() >= 2) {
-    joy_sub_ = this->create_subscription<sensor_msgs::msg::Joy>(
+    joy_sub_ = node_->create_subscription<sensor_msgs::msg::Joy>(
         "/joy", 10, std::bind(&BehaviorPlannerServer::JoyCallback, this, std::placeholders::_1));
   }
   bool use_sim_state = true;
-  this->declare_parameter("use_sim_state", use_sim_state);
-  this->get_parameter("use_sim_state", use_sim_state);
+  node_->declare_parameter("use_sim_state", use_sim_state);
+  node_->get_parameter("use_sim_state", use_sim_state);
   bp_.set_use_sim_state(use_sim_state);
   p_visualizer_->Init();
 }

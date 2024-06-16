@@ -1,14 +1,8 @@
-/**
- * @file ssc_server_ros.h
- * @brief planner server
- * @version 0.1
- * @date 2019-02
- * @copyright Copyright (c) 2019
- */
 #ifndef _UTIL_SSC_PLANNER_INC_SSC_SERVER_ROS_H_
 #define _UTIL_SSC_PLANNER_INC_SSC_SERVER_ROS_H_
 
 #include <chrono>
+#include <memory>
 #include <numeric>
 #include <thread>
 
@@ -34,7 +28,8 @@
 #include "visualization_msgs/msg/marker_array.hpp"
 
 namespace planning {
-class SscPlannerServer : public rclcpp::Node, public std::enable_shared_from_this<SscPlannerServer> {
+
+class SscPlannerServer {
  public:
   using SemanticMapManager = semantic_map_manager::SemanticMapManager;
   using FrenetTrajectory = common::FrenetTrajectory;
@@ -42,8 +37,8 @@ class SscPlannerServer : public rclcpp::Node, public std::enable_shared_from_thi
     int kInputBufferSize{100};
   };
 
-  static std::shared_ptr<SscPlannerServer> Create(const rclcpp::NodeOptions &options, int ego_id);
-  static std::shared_ptr<SscPlannerServer> Create(const rclcpp::NodeOptions &options, double work_rate, int ego_id);
+  static std::shared_ptr<SscPlannerServer> Create(std::shared_ptr<rclcpp::Node> node, int ego_id);
+  static std::shared_ptr<SscPlannerServer> Create(std::shared_ptr<rclcpp::Node> node, double work_rate, int ego_id);
 
   void PushSemanticMap(const SemanticMapManager &smm);
 
@@ -51,19 +46,17 @@ class SscPlannerServer : public rclcpp::Node, public std::enable_shared_from_thi
 
   void Start();
 
-  SscPlannerServer(const rclcpp::NodeOptions &options, int ego_id);
-  SscPlannerServer(const rclcpp::NodeOptions &options, double work_rate, int ego_id);
-  
- private:
+  SscPlannerServer(std::shared_ptr<rclcpp::Node> node, int ego_id);
+  SscPlannerServer(std::shared_ptr<rclcpp::Node> node, double work_rate, int ego_id);
 
+ private:
   void Initialize();
   void PlanCycleCallback();
   void Replan();
   void PublishData();
   void MainThread();
 
-  ErrorType FilterSingularityState(const vec_E<common::State> &hist,
-                                   common::State *filter_state);
+  ErrorType FilterSingularityState(const vec_E<common::State> &hist, common::State *filter_state);
 
   Config config_;
 
@@ -82,6 +75,7 @@ class SscPlannerServer : public rclcpp::Node, public std::enable_shared_from_thi
   // ROS2 related
   decimal_t work_rate_ = 20.0;
   int ego_id_;
+  std::shared_ptr<rclcpp::Node> node_;
 
   bool require_intervention_signal_ = false;
   rclcpp::Publisher<vehicle_msgs::msg::ControlSignal>::SharedPtr ctrl_signal_pub_;

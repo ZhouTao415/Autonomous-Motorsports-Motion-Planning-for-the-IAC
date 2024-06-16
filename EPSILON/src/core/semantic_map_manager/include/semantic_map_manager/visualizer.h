@@ -1,10 +1,8 @@
 #ifndef _CORE_SEMANTIC_MAP_INC_SEMANTIC_MAP_MANAGER_VISUALIZER_H_
 #define _CORE_SEMANTIC_MAP_INC_SEMANTIC_MAP_MANAGER_VISUALIZER_H_
 
-#include <assert.h>
 #include <rclcpp/rclcpp.hpp>
 #include <tf2_ros/transform_broadcaster.h>
-#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
 #include <iostream>
 #include <vector>
@@ -17,11 +15,11 @@
 
 namespace semantic_map_manager {
 
-class Visualizer : public rclcpp::Node {
+class Visualizer {
  public:
   using ObstacleMapType = uint8_t;
 
-  Visualizer(rclcpp::NodeOptions options, int node_id);
+  Visualizer(rclcpp::Node::SharedPtr node, int node_id);
   ~Visualizer() {}
 
   void VisualizeData(const SemanticMapManager &smm);
@@ -68,6 +66,7 @@ class Visualizer : public rclcpp::Node {
 
   std::string ego_tf_name_;
 
+  rclcpp::Node::SharedPtr node_;
   int node_id_;
 
   rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr ego_vehicle_pub_;
@@ -79,8 +78,8 @@ class Visualizer : public rclcpp::Node {
   rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr pred_intention_vis_pub_;
   rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr surrounding_vehicle_vis_pub_;
   rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr speed_limit_vis_pub_;
-  std::shared_ptr<tf2_ros::TransformBroadcaster> ego_to_map_tf_;
-  double marker_lifetime_{0.05};
+  tf2_ros::TransformBroadcaster ego_to_map_tf_;
+  decimal_t marker_lifetime_{0.05};
 };  // Visualizer
 
 }  // namespace semantic_map_manager

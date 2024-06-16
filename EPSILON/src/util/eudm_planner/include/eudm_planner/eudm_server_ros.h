@@ -2,7 +2,6 @@
 #define _CORE_EUDM_PLANNER_INC_EUDM_SERVER_ROS_H__
 
 #include <sensor_msgs/msg/joy.hpp>
-
 #include <chrono>
 #include <functional>
 #include <numeric>
@@ -38,9 +37,9 @@ class EudmPlannerServer : public rclcpp::Node {
     int kInputBufferSize{100};
   };
 
-  EudmPlannerServer(const rclcpp::NodeOptions &options, int ego_id);
+  EudmPlannerServer(std::shared_ptr<rclcpp::Node> node, int ego_id);
 
-  EudmPlannerServer(const rclcpp::NodeOptions &options, double work_rate, int ego_id);
+  EudmPlannerServer(std::shared_ptr<rclcpp::Node> node, double work_rate, int ego_id);
 
   void PushSemanticMap(const SemanticMapManager &smm);
 
@@ -76,7 +75,7 @@ class EudmPlannerServer : public rclcpp::Node {
   Config config_;
 
   EudmManager bp_manager_;
-  EudmPlannerVisualizer *p_visualizer_;
+  std::unique_ptr<EudmPlannerVisualizer> p_visualizer_;
 
   SemanticMapManager smm_;
 
@@ -87,7 +86,7 @@ class EudmPlannerServer : public rclcpp::Node {
   int ego_id_;
 
   // input buffer
-  moodycamel::ReaderWriterQueue<SemanticMapManager> *p_input_smm_buff_;
+  std::unique_ptr<moodycamel::ReaderWriterQueue<SemanticMapManager>> p_input_smm_buff_;
 
   bool has_callback_binded_ = false;
   std::function<int(const SemanticMapManager &)> private_callback_fn_;
@@ -95,4 +94,4 @@ class EudmPlannerServer : public rclcpp::Node {
 
 }  // namespace planning
 
-#endif
+#endif  // _CORE_EUDM_PLANNER_INC_EUDM_SERVER_ROS_H__

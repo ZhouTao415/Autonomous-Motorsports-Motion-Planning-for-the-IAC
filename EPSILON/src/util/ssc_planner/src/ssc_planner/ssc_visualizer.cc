@@ -1,18 +1,9 @@
-/**
- * @file ssc_visualizer.cc
- * @author HKUST Aerial Robotics Group
- * @brief implementation for ssc visualizer
- * @version 0.1
- * @date 2019-02
- * @copyright Copyright (c) 2019
- */
-
 #include "ssc_planner/ssc_visualizer.h"
 
 namespace planning {
 
-SscVisualizer::SscVisualizer(std::shared_ptr<rclcpp::Node> nh, int node_id)
-    : nh_(nh), node_id_(node_id) {
+SscVisualizer::SscVisualizer(rclcpp::Node::SharedPtr node, int node_id)
+    : node_(node), node_id_(node_id) {
   std::cout << "node_id_ = " << node_id_ << std::endl;
 
   std::string ssc_map_vis_topic = std::string("/vis/agent_") +
@@ -34,12 +25,17 @@ SscVisualizer::SscVisualizer(std::shared_ptr<rclcpp::Node> nh, int node_id)
                              std::to_string(node_id_) +
                              std::string("/ssc/qp_vis");
 
-  ssc_map_pub_ = nh_->create_publisher<visualization_msgs::msg::MarkerArray>(ssc_map_vis_topic, 1);
-  qp_pub_ = nh_->create_publisher<visualization_msgs::msg::MarkerArray>(qp_vis_topic, 1);
-  ego_vehicle_pub_ = nh_->create_publisher<visualization_msgs::msg::MarkerArray>(ego_vehicle_vis_topic, 1);
-  forward_trajs_pub_ = nh_->create_publisher<visualization_msgs::msg::MarkerArray>(forward_trajs_vis_topic, 1);
-  sur_vehicle_trajs_pub_ = nh_->create_publisher<visualization_msgs::msg::MarkerArray>(sur_vehicle_trajs_vis_topic, 1);
-  corridor_pub_ = nh_->create_publisher<visualization_msgs::msg::MarkerArray>(corridor_vis_topic, 1);
+  ssc_map_pub_ =
+      node_->create_publisher<visualization_msgs::msg::MarkerArray>(ssc_map_vis_topic, 1);
+  qp_pub_ = node_->create_publisher<visualization_msgs::msg::MarkerArray>(qp_vis_topic, 1);
+  ego_vehicle_pub_ =
+      node_->create_publisher<visualization_msgs::msg::MarkerArray>(ego_vehicle_vis_topic, 1);
+  forward_trajs_pub_ = node_->create_publisher<visualization_msgs::msg::MarkerArray>(
+      forward_trajs_vis_topic, 1);
+  sur_vehicle_trajs_pub_ = node_->create_publisher<visualization_msgs::msg::MarkerArray>(
+      sur_vehicle_trajs_vis_topic, 1);
+  corridor_pub_ =
+      node_->create_publisher<visualization_msgs::msg::MarkerArray>(corridor_vis_topic, 1);
 }
 
 void SscVisualizer::VisualizeDataWithStamp(const rclcpp::Time &stamp,
@@ -59,7 +55,7 @@ void SscVisualizer::VisualizeDataWithStamp(const rclcpp::Time &stamp,
 void SscVisualizer::VisualizeQpTrajs(
     const rclcpp::Time &stamp, const vec_E<common::BezierSpline<5, 2>> &trajs) {
   if (trajs.empty()) {
-    printf("[SscQP]No valid qp trajs.\n");
+    RCLCPP_WARN(node_->get_logger(), "[SscQP]No valid qp trajs.");
     return;
   }
   int id = 0;
@@ -104,6 +100,7 @@ void SscVisualizer::VisualizeSscMap(const rclcpp::Time &stamp,
       p_ssc_map->config().map_resolution[0] * p_ssc_map->config().map_size[0];
   decimal_t x = s_len / 2 - p_ssc_map->config().s_back_len + origin[0];
   decimal_t y = 0;
+  // decimal_t z = t_len / 2;
   std::array<decimal_t, 3> aabb_coord = {x, y, 0};
   std::array<decimal_t, 3> aabb_len = {s_len, 3.5, 0.01};
   common::AxisAlignedBoundingBoxND<3> map_aabb(aabb_coord, aabb_len);
@@ -306,7 +303,7 @@ void SscVisualizer::VisualizeCorridorsInSscSpace(
 
   int num_markers = static_cast<int>(corridor_vec_marker.markers.size());
   common::VisualizationUtil::FillHeaderIdInMarkerArray(
-      rclcpp::Clock(RCL_ROS_TIME).now(), std::string("ssc_map"), last_corridor_mk_cnt,
+      node_->now(), std::string("ssc_map"), last_corridor_mk_cnt,
       &corridor_vec_marker);
   corridor_pub_->publish(corridor_vec_marker);
   last_corridor_mk_cnt = num_markers;

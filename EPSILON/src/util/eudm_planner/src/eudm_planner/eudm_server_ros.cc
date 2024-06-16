@@ -2,17 +2,17 @@
 
 namespace planning {
 
-EudmPlannerServer::EudmPlannerServer(const rclcpp::NodeOptions &options, int ego_id)
-    : Node("eudm_planner_server", options), work_rate_(20.0), ego_id_(ego_id) {
-  p_visualizer_ = new EudmPlannerVisualizer(options, &bp_manager_, ego_id);
-  p_input_smm_buff_ = new moodycamel::ReaderWriterQueue<SemanticMapManager>(config_.kInputBufferSize);
+EudmPlannerServer::EudmPlannerServer(std::shared_ptr<rclcpp::Node> node, int ego_id)
+    : rclcpp::Node("eudm_planner_server"), work_rate_(20.0), ego_id_(ego_id) {
+  p_visualizer_ = std::make_unique<EudmPlannerVisualizer>(node, &bp_manager_, ego_id);
+  p_input_smm_buff_ = std::make_unique<moodycamel::ReaderWriterQueue<SemanticMapManager>>(config_.kInputBufferSize);
   task_.user_perferred_behavior = 0;
 }
 
-EudmPlannerServer::EudmPlannerServer(const rclcpp::NodeOptions &options, double work_rate, int ego_id)
-    : Node("eudm_planner_server", options), work_rate_(work_rate), ego_id_(ego_id) {
-  p_visualizer_ = new EudmPlannerVisualizer(options, &bp_manager_, ego_id);
-  p_input_smm_buff_ = new moodycamel::ReaderWriterQueue<SemanticMapManager>(config_.kInputBufferSize);
+EudmPlannerServer::EudmPlannerServer(std::shared_ptr<rclcpp::Node> node, double work_rate, int ego_id)
+    : rclcpp::Node("eudm_planner_server"), work_rate_(work_rate), ego_id_(ego_id) {
+  p_visualizer_ = std::make_unique<EudmPlannerVisualizer>(node, &bp_manager_, ego_id);
+  p_input_smm_buff_ = std::make_unique<moodycamel::ReaderWriterQueue<SemanticMapManager>>(config_.kInputBufferSize);
   task_.user_perferred_behavior = 0;
 }
 
@@ -21,7 +21,7 @@ void EudmPlannerServer::PushSemanticMap(const SemanticMapManager &smm) {
 }
 
 void EudmPlannerServer::PublishData() {
-  p_visualizer_->PublishDataWithStamp(rclcpp::Clock(RCL_ROS_TIME).now());
+  p_visualizer_->PublishDataWithStamp(this->get_clock()->now());
 }
 
 void EudmPlannerServer::Init(const std::string &bp_config_path) {

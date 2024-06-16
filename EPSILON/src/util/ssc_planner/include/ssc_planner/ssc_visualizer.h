@@ -1,17 +1,8 @@
-/**
- * @file ssc_visualizer.h
- * @author HKUST Aerial Robotics Group
- * @brief visualizer for the planner
- * @version 0.1
- * @date 2019-02
- * @copyright Copyright (c) 2019
- */
 #ifndef _UTIL_SSC_PLANNER_INC_VISUALIZER_H_
 #define _UTIL_SSC_PLANNER_INC_VISUALIZER_H_
 
 #include <assert.h>
 #include <rclcpp/rclcpp.hpp>
-#include <tf2/LinearMath/Transform.h>
 #include <tf2_ros/transform_broadcaster.h>
 
 #include <iostream>
@@ -28,22 +19,19 @@
 namespace planning {
 
 class SscVisualizer {
-public:
-  SscVisualizer(std::shared_ptr<rclcpp::Node> nh, int node_id);
+ public:
+  SscVisualizer(rclcpp::Node::SharedPtr node, int node_id);
   ~SscVisualizer() {}
 
-  void VisualizeDataWithStamp(const rclcpp::Time &stamp,
-                              const SscPlanner &planner);
+  void VisualizeDataWithStamp(const rclcpp::Time &stamp, const SscPlanner &planner);
 
-private:
+ private:
   void VisualizeSscMap(const rclcpp::Time &stamp, const SscMap *p_ssc_map);
-  void VisualizeEgoVehicleInSscSpace(const rclcpp::Time &stamp,
-                                     const common::FsVehicle &fs_ego_vehicle);
+  void VisualizeEgoVehicleInSscSpace(const rclcpp::Time &stamp, const common::FsVehicle &fs_ego_vehicle);
   void VisualizeForwardTrajectoriesInSscSpace(
       const rclcpp::Time &stamp, const vec_E<vec_E<common::FsVehicle>> &trajs,
       const SscMap *p_ssc_map);
-  void VisualizeQpTrajs(const rclcpp::Time &stamp,
-                        const vec_E<common::BezierSpline<5, 2>> &trajs);
+  void VisualizeQpTrajs(const rclcpp::Time &stamp, const vec_E<common::BezierSpline<5, 2>> &trajs);
   void VisualizeSurroundingVehicleTrajInSscSpace(
       const rclcpp::Time &stamp,
       const vec_E<std::unordered_map<int, vec_E<common::FsVehicle>>> &trajs_set,
@@ -55,7 +43,7 @@ private:
   int last_traj_list_marker_cnt_ = 0;
   int last_surrounding_vehicle_marker_cnt_ = 0;
 
-  std::shared_ptr<rclcpp::Node> nh_;
+  rclcpp::Node::SharedPtr node_;
   int node_id_;
 
   decimal_t start_time_;

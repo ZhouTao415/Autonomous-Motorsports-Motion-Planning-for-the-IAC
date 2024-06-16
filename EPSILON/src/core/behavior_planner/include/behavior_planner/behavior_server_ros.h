@@ -34,8 +34,8 @@ class BehaviorPlannerServer : public rclcpp::Node {
     int kInputBufferSize{100};
   };
 
-  static std::shared_ptr<BehaviorPlannerServer> Create(const rclcpp::NodeOptions &options, double work_rate, int ego_id) {
-    auto server = std::shared_ptr<BehaviorPlannerServer>(new BehaviorPlannerServer(options, work_rate, ego_id));
+  static std::shared_ptr<BehaviorPlannerServer> Create(std::shared_ptr<rclcpp::Node> node, double work_rate, int ego_id) {
+    auto server = std::shared_ptr<BehaviorPlannerServer>(new BehaviorPlannerServer(node, work_rate, ego_id));
     server->p_visualizer_ = std::make_unique<BehaviorPlannerVisualizer>(server, &(server->bp_), ego_id);
     server->p_input_smm_buff_ = std::make_unique<moodycamel::ReaderWriterQueue<SemanticMapManager>>(server->config_.kInputBufferSize);
     return server;
@@ -54,8 +54,8 @@ class BehaviorPlannerServer : public rclcpp::Node {
   void enable_hmi_interface();
   void Init();
   void Start();
-  BehaviorPlannerServer(const rclcpp::NodeOptions &options, double work_rate, int ego_id)
-      : Node("behavior_planner_server", options), work_rate_(work_rate), ego_id_(ego_id) {}
+  BehaviorPlannerServer(std::shared_ptr<rclcpp::Node> node, double work_rate, int ego_id)
+      : Node("behavior_planner_server", node->get_node_options()), work_rate_(work_rate), ego_id_(ego_id), node_(node) {}
 
  private:
 
@@ -79,6 +79,7 @@ class BehaviorPlannerServer : public rclcpp::Node {
 
   double work_rate_;
   int ego_id_;
+  std::shared_ptr<rclcpp::Node> node_;
 
   // input buffer
   std::unique_ptr<moodycamel::ReaderWriterQueue<SemanticMapManager>> p_input_smm_buff_;
@@ -91,4 +92,4 @@ class BehaviorPlannerServer : public rclcpp::Node {
 
 }  // namespace planning
 
-#endif
+#endif  // _CORE_BEHAVIOR_PLANNER_INC_BEHAVIOR_SERVER_ROS2_H__

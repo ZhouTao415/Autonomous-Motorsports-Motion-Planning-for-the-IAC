@@ -4,11 +4,11 @@ namespace semantic_map_manager {
 
 void RosAdapter::Init() {
   // communicate with phy simulator
-  arena_info_sub_ = this->create_subscription<vehicle_msgs::msg::ArenaInfo>(
+  arena_info_sub_ = node_->create_subscription<vehicle_msgs::msg::ArenaInfo>(
       "arena_info", 2, std::bind(&RosAdapter::ArenaInfoCallback, this, std::placeholders::_1));
-  arena_info_static_sub_ = this->create_subscription<vehicle_msgs::msg::ArenaInfoStatic>(
+  arena_info_static_sub_ = node_->create_subscription<vehicle_msgs::msg::ArenaInfoStatic>(
       "arena_info_static", 2, std::bind(&RosAdapter::ArenaInfoStaticCallback, this, std::placeholders::_1));
-  arena_info_dynamic_sub_ = this->create_subscription<vehicle_msgs::msg::ArenaInfoDynamic>(
+  arena_info_dynamic_sub_ = node_->create_subscription<vehicle_msgs::msg::ArenaInfoDynamic>(
       "arena_info_dynamic", 2, std::bind(&RosAdapter::ArenaInfoDynamicCallback, this, std::placeholders::_1));
 }
 

@@ -16,12 +16,12 @@
 
 namespace semantic_map_manager {
 
-class RosAdapter : public rclcpp::Node {
+class RosAdapter {
  public:
   using GridMap2D = common::GridMapND<uint8_t, 2>;
 
-  RosAdapter(rclcpp::NodeOptions options, SemanticMapManager* ptr_smm)
-      : Node("ros_adapter", options), p_data_renderer_(new DataRenderer(ptr_smm)), p_smm_(ptr_smm) {
+  RosAdapter(std::shared_ptr<rclcpp::Node> node, SemanticMapManager* ptr_smm)
+      : node_(node), p_data_renderer_(new DataRenderer(ptr_smm)), p_smm_(ptr_smm) {
     Init();
   }
 
@@ -45,6 +45,7 @@ class RosAdapter : public rclcpp::Node {
   rclcpp::Subscription<vehicle_msgs::msg::ArenaInfoStatic>::SharedPtr arena_info_static_sub_;
   rclcpp::Subscription<vehicle_msgs::msg::ArenaInfoDynamic>::SharedPtr arena_info_dynamic_sub_;
 
+  std::shared_ptr<rclcpp::Node> node_;
   common::Vehicle ego_vehicle_;
   common::VehicleSet vehicle_set_;
   common::LaneNet lane_net_;

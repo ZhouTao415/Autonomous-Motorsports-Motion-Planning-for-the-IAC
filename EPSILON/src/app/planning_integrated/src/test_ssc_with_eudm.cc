@@ -79,21 +79,19 @@ int main(int argc, char** argv) {
 
   try {
     auto semantic_map_manager = std::make_shared<semantic_map_manager::SemanticMapManager>(ego_id, agent_config_path);
-    auto smm_ros_adapter = std::make_shared<semantic_map_manager::RosAdapter>(node->get_node_options(), semantic_map_manager.get());
+    auto smm_ros_adapter = std::make_shared<semantic_map_manager::RosAdapter>(node, semantic_map_manager.get());
     smm_ros_adapter->BindMapUpdateCallback(SemanticMapUpdateCallback);
 
-    p_bp_server_ = std::make_shared<planning::EudmPlannerServer>(node->get_node_options(), bp_work_rate, ego_id);
+    p_bp_server_ = std::make_shared<planning::EudmPlannerServer>(node, bp_work_rate, ego_id);
     p_bp_server_->set_user_desired_velocity(desired_vel);
     p_bp_server_->BindBehaviorUpdateCallback(BehaviorUpdateCallback);
 
-    p_ssc_server_ = std::make_shared<planning::SscPlannerServer>(node->get_node_options(), ssc_planner_work_rate, ego_id);
+    p_ssc_server_ = planning::SscPlannerServer::Create(node, ssc_planner_work_rate, ego_id);
 
-    // 初始化服务器
     p_ssc_server_->Init(ssc_config_path);
     p_bp_server_->Init(bp_config_path);
     smm_ros_adapter->Init();
 
-    // 启动服务器
     p_bp_server_->Start();
     p_ssc_server_->Start();
 

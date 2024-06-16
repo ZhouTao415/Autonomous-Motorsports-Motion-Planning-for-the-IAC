@@ -1,9 +1,3 @@
-/**
- * @file test_ssc_with_mpdm.cc
- * @brief
- * @version 0.1
- * @date 2020-09-21
- */
 #include <rclcpp/rclcpp.hpp>
 #include <stdlib.h>
 
@@ -74,16 +68,16 @@ int main(int argc, char** argv) {
 
   try {
     auto semantic_map_manager = std::make_shared<semantic_map_manager::SemanticMapManager>(ego_id, agent_config_path);
-    auto smm_ros_adapter = std::make_shared<semantic_map_manager::RosAdapter>(node->get_node_options(), semantic_map_manager.get());
+    auto smm_ros_adapter = std::make_shared<semantic_map_manager::RosAdapter>(node, semantic_map_manager.get());
     smm_ros_adapter->BindMapUpdateCallback(SemanticMapUpdateCallback);
 
-    p_bp_server_ = std::make_shared<planning::BehaviorPlannerServer>(node->get_node_options(), bp_work_rate, ego_id);
+    p_bp_server_ = planning::BehaviorPlannerServer::Create(node, bp_work_rate, ego_id);
     p_bp_server_->set_user_desired_velocity(desired_vel);
     p_bp_server_->BindBehaviorUpdateCallback(BehaviorUpdateCallback);
     p_bp_server_->set_autonomous_level(3);
     p_bp_server_->enable_hmi_interface();
 
-    p_ssc_server_ = std::make_shared<planning::SscPlannerServer>(node->get_node_options(), ssc_planner_work_rate, ego_id);
+    p_ssc_server_ = planning::SscPlannerServer::Create(node, ssc_planner_work_rate, ego_id);
 
     p_ssc_server_->Init(ssc_config_path);
     p_bp_server_->Init();

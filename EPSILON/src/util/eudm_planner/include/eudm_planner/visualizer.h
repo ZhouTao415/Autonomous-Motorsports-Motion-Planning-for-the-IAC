@@ -1,10 +1,3 @@
-/**
- * @file eudm_planner_ros_adapter.h
- * @brief planner server
- * @version 0.1
- * @date 2019-02
- */
-
 #ifndef _CORE_EUDM_PLANNER_INC_EUDM_PLANNER_ROS_ADAPTER_H_
 #define _CORE_EUDM_PLANNER_INC_EUDM_PLANNER_ROS_ADAPTER_H_
 
@@ -23,10 +16,10 @@
 
 namespace planning {
 
-class EudmPlannerVisualizer : public rclcpp::Node {
+class EudmPlannerVisualizer {
  public:
-  EudmPlannerVisualizer(const rclcpp::NodeOptions &options, EudmManager* p_bp_manager, int ego_id)
-      : Node("eudm_planner_visualizer", options), ego_id_(ego_id) {
+  EudmPlannerVisualizer(std::shared_ptr<rclcpp::Node> node, EudmManager* p_bp_manager, int ego_id)
+      : node_(node), ego_id_(ego_id) {
     assert(p_bp_manager != nullptr);
     p_bp_manager_ = p_bp_manager;
   }
@@ -36,7 +29,7 @@ class EudmPlannerVisualizer : public rclcpp::Node {
                                      std::to_string(ego_id_) +
                                      std::string("/forward_trajs");
 
-    forward_traj_vis_pub_ = this->create_publisher<visualization_msgs::msg::MarkerArray>(forward_traj_topic, 1);
+    forward_traj_vis_pub_ = node_->create_publisher<visualization_msgs::msg::MarkerArray>(forward_traj_topic, 1);
   }
 
   void PublishDataWithStamp(const rclcpp::Time& stamp) {
@@ -88,14 +81,15 @@ class EudmPlannerVisualizer : public rclcpp::Node {
   void set_use_sim_state(bool use_sim_state) { use_sim_state_ = use_sim_state; }
 
  private:
+  std::shared_ptr<rclcpp::Node> node_;
   int ego_id_;
+  EudmManager* p_bp_manager_{nullptr};
   bool use_sim_state_ = true;
 
   int last_forward_trajs_marker_cnt_ = 0;
 
   rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr forward_traj_vis_pub_;
 
-  EudmManager* p_bp_manager_{nullptr};
 };
 
 }  // namespace planning
