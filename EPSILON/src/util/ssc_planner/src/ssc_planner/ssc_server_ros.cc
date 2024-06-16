@@ -123,8 +123,8 @@ void SscPlannerServer::Init(const std::string& config_path) {
   planner_.Init(config_path);
 
   std::string traj_topic = std::string("/vis/agent_") + std::to_string(ego_id_) + std::string("/ssc/exec_traj");
-  node_->declare_parameter("use_sim_state", true);
-  node_->get_parameter("use_sim_state", use_sim_state_);
+  // node_->declare_parameter("use_sim_state", true);
+  // node_->get_parameter("use_sim_state", use_sim_state_);
 
   ctrl_signal_pub_ = node_->create_publisher<vehicle_msgs::msg::ControlSignal>("ctrl", 20);
   map_marker_pub_ = node_->create_publisher<visualization_msgs::msg::MarkerArray>("ssc_map", 1);
