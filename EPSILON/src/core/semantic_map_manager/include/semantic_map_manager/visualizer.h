@@ -1,11 +1,12 @@
 #ifndef _CORE_SEMANTIC_MAP_INC_SEMANTIC_MAP_MANAGER_VISUALIZER_H_
 #define _CORE_SEMANTIC_MAP_INC_SEMANTIC_MAP_MANAGER_VISUALIZER_H_
 
-#include <rclcpp/rclcpp.hpp>
-#include <tf2_ros/transform_broadcaster.h>
-
+#include <assert.h>
 #include <iostream>
 #include <vector>
+
+#include <rclcpp/rclcpp.hpp>
+#include <tf2_ros/transform_broadcaster.h>
 
 #include "common/basics/basics.h"
 #include "common/basics/semantics.h"

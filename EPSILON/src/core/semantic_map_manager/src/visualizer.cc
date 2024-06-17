@@ -49,7 +49,8 @@ Visualizer::Visualizer(rclcpp::Node::SharedPtr node, int node_id)
 
 void Visualizer::VisualizeData(const SemanticMapManager &smm) {
   if (smm.time_stamp() < kEPS) return;  // if time stamp unset, return
-  auto time_stamp = node_->now();
+  // auto time_stamp = node_->now();
+  auto time_stamp = rclcpp::Time(smm.time_stamp() * 1e9);
   VisualizeDataWithStamp(time_stamp, smm);
   SendTfWithStamp(time_stamp, smm);
 }
@@ -134,7 +135,7 @@ void Visualizer::VisualizeObstacleMap(
   if (obstacle_map.data_size() < 1) return;
   nav_msgs::msg::OccupancyGrid occ_map;
   common::VisualizationUtil::GetRosOccupancyGridUsingGripMap2D(
-      obstacle_map, node_->now(), &occ_map);
+      obstacle_map, node_->get_clock()->now(), &occ_map);
   occ_map.header.stamp = stamp;
   obstacle_map_pub_->publish(occ_map);
 }
@@ -159,7 +160,10 @@ void Visualizer::SendTfWithStamp(const rclcpp::Time &stamp,
   transformStamped.transform.translation.z = pose.position.z;
   transformStamped.transform.rotation = pose.orientation;
 
-  ego_to_map_tf_.sendTransform(transformStamped);
+  // ego_to_map_tf_.sendTransform(transformStamped);
+  // Using TransformBroadcaster to send the transform
+  static tf2_ros::TransformBroadcaster br(node_);
+  br.sendTransform(transformStamped);
 }
 
 void Visualizer::VisualizeSurroundingLaneNet(

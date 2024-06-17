@@ -303,7 +303,7 @@ void SscVisualizer::VisualizeCorridorsInSscSpace(
 
   int num_markers = static_cast<int>(corridor_vec_marker.markers.size());
   common::VisualizationUtil::FillHeaderIdInMarkerArray(
-      node_->now(), std::string("ssc_map"), last_corridor_mk_cnt,
+      node_->get_clock()->now(), std::string("ssc_map"), last_corridor_mk_cnt,
       &corridor_vec_marker);
   corridor_pub_->publish(corridor_vec_marker);
   last_corridor_mk_cnt = num_markers;

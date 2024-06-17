@@ -11,12 +11,12 @@ namespace phy_simulator {
 
 RosAdapter::RosAdapter() {}
 
-RosAdapter::RosAdapter(std::shared_ptr<rclcpp::Node> nh) : nh_(nh) {
-  // arena_info_pub_ = nh_->create_publisher<vehicle_msgs::msg::ArenaInfo>("arena_info", 10);
+RosAdapter::RosAdapter(std::shared_ptr<rclcpp::Node> node) : node_(node) {
+  arena_info_pub_ = node_->create_publisher<vehicle_msgs::msg::ArenaInfo>("arena_info", 10);
   arena_info_static_pub_ =
-      nh_->create_publisher<vehicle_msgs::msg::ArenaInfoStatic>("arena_info_static", 10);
+      node_->create_publisher<vehicle_msgs::msg::ArenaInfoStatic>("arena_info_static", 10);
   arena_info_dynamic_pub_ =
-      nh_->create_publisher<vehicle_msgs::msg::ArenaInfoDynamic>("arena_info_dynamic", 10);
+      node_->create_publisher<vehicle_msgs::msg::ArenaInfoDynamic>("arena_info_dynamic", 10);
 }
 
 void RosAdapter::PublishDataWithStamp(const rclcpp::Time &stamp) {

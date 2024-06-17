@@ -85,9 +85,7 @@ int main(int argc, char** argv) {
     p_bp_server_ = std::make_shared<planning::EudmPlannerServer>(node, bp_work_rate, ego_id);
     p_bp_server_->set_user_desired_velocity(desired_vel);
     p_bp_server_->BindBehaviorUpdateCallback(BehaviorUpdateCallback);
-
     p_ssc_server_ = planning::SscPlannerServer::Create(node, ssc_planner_work_rate, ego_id);
-
     p_ssc_server_->Init(ssc_config_path);
     p_bp_server_->Init(bp_config_path);
     smm_ros_adapter->Init();

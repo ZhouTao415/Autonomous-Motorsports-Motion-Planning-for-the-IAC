@@ -1,3 +1,13 @@
+/**
+ * @file phy_simulator_planning_node.cc
+ * @author your name (you@domain.com)
+ * @brief 
+ * @version 0.1
+ * @date 2024-06-16
+ * 
+ * @copyright Copyright (c) 2024
+ * 
+ */
 #include <algorithm>
 #include <chrono>
 #include <iostream>
@@ -112,9 +122,9 @@ int main(int argc, char** argv) {
       "/move_base_simple/goal", 10, NavGoalCallback);
 
   rclcpp::Rate rate(simulation_rate);
-  rclcpp::Time next_gt_pub_time = node->now();
+  rclcpp::Time next_gt_pub_time = node->get_clock()->now();
   rclcpp::Time next_gt_static_pub_time = next_gt_pub_time;
-  rclcpp::Time next_vis_pub_time = node->now();
+  rclcpp::Time next_vis_pub_time = node->get_clock()->now();
 
   std::cout << "[PhySimulation] Initialization finished, waiting for callback" << std::endl;
 
@@ -124,7 +134,7 @@ int main(int argc, char** argv) {
 
     phy_sim.UpdateSimulatorUsingSignalSet(_signal_set, 1.0 / simulation_rate);
 
-    rclcpp::Time tnow = node->now();
+    rclcpp::Time tnow = node->get_clock()->now();
     if (tnow >= next_gt_pub_time) {
       next_gt_pub_time += rclcpp::Duration::from_seconds(1.0 / gt_msg_rate);
       ros_adapter.PublishDynamicDataWithStamp(tnow);

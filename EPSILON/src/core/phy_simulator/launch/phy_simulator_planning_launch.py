@@ -57,8 +57,8 @@ def generate_launch_description():
             'lane_net_path': lane_net_path
         }],
         remappings=[
-            ('/phy_simulator/arena_info_static', LaunchConfiguration('arena_info_static_topic')),
-            ('/phy_simulator/arena_info_dynamic', LaunchConfiguration('arena_info_dynamic_topic'))
+            ('arena_info_static', LaunchConfiguration('arena_info_static_topic')),
+            ('arena_info_dynamic', LaunchConfiguration('arena_info_dynamic_topic'))
         ]
     )
 

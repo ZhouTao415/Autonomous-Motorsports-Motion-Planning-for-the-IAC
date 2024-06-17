@@ -31,8 +31,7 @@ void RosAdapter::ArenaInfoStaticCallback(const vehicle_msgs::msg::ArenaInfoStati
 
 void RosAdapter::ArenaInfoDynamicCallback(const vehicle_msgs::msg::ArenaInfoDynamic::SharedPtr msg) {
   rclcpp::Time time_stamp;
-  vehicle_msgs::Decoder::GetSimulatorDataFromRosArenaInfoDynamic(
-      *msg, &time_stamp, &vehicle_set_);
+  vehicle_msgs::Decoder::GetSimulatorDataFromRosArenaInfoDynamic(*msg, &time_stamp, &vehicle_set_);
 
   if (get_arena_info_static_) {
     p_data_renderer_->Render(time_stamp.seconds(), lane_net_, vehicle_set_, obstacle_set_);

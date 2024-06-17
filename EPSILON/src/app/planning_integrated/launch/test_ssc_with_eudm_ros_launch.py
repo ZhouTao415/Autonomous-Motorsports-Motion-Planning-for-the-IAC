@@ -23,7 +23,7 @@ def generate_launch_description():
     test_ssc_with_eudm_node = Node(
         package='planning_integrated',
         executable='test_ssc_with_eudm',
-        name='test_ssc_with_eudm',
+        name='test_ssc_with_eudm_0',
         output='screen',
         parameters=[{
             'ego_id': 0,

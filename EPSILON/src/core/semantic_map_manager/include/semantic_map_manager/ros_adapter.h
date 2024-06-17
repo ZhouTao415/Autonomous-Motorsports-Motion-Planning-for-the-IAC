@@ -1,6 +1,8 @@
 #ifndef _CORE_SEMANTIC_MAP_INC_SEMANTIC_MAP_MANAGER_ROS_ADAPTER_H_
 #define _CORE_SEMANTIC_MAP_INC_SEMANTIC_MAP_MANAGER_ROS_ADAPTER_H_
 
+#include <assert.h>
+
 #include <functional>
 #include <iostream>
 #include <vector>
@@ -10,6 +12,7 @@
 #include "rclcpp/rclcpp.hpp"
 #include "semantic_map_manager/data_renderer.h"
 #include "vehicle_msgs/decoder.h"
+
 #include "vehicle_msgs/msg/arena_info.hpp"
 #include "vehicle_msgs/msg/arena_info_static.hpp"
 #include "vehicle_msgs/msg/arena_info_dynamic.hpp"
@@ -21,7 +24,7 @@ class RosAdapter {
   using GridMap2D = common::GridMapND<uint8_t, 2>;
 
   RosAdapter(std::shared_ptr<rclcpp::Node> node, SemanticMapManager* ptr_smm)
-      : node_(node), p_data_renderer_(new DataRenderer(ptr_smm)), p_smm_(ptr_smm) {
+      : node_(node), p_smm_(ptr_smm), p_data_renderer_(new DataRenderer(ptr_smm)) {
     Init();
   }
 
@@ -40,12 +43,13 @@ class RosAdapter {
 
   void ArenaInfoDynamicCallback(const vehicle_msgs::msg::ArenaInfoDynamic::SharedPtr msg);
 
+  std::shared_ptr<rclcpp::Node> node_;
+
   // communicate with phy simulator
   rclcpp::Subscription<vehicle_msgs::msg::ArenaInfo>::SharedPtr arena_info_sub_;
   rclcpp::Subscription<vehicle_msgs::msg::ArenaInfoStatic>::SharedPtr arena_info_static_sub_;
   rclcpp::Subscription<vehicle_msgs::msg::ArenaInfoDynamic>::SharedPtr arena_info_dynamic_sub_;
 
-  std::shared_ptr<rclcpp::Node> node_;
   common::Vehicle ego_vehicle_;
   common::VehicleSet vehicle_set_;
   common::LaneNet lane_net_;

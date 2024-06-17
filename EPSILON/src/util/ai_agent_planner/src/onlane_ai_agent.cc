@@ -127,12 +127,12 @@ void PublishControl() {
   {
     vehicle_msgs::msg::ControlSignal ctrl_msg;
     vehicle_msgs::Encoder::GetRosControlSignalFromControlSignal(
-        ctrl, rclcpp::Clock().now(), std::string("map"), &ctrl_msg);
+        ctrl, rclcpp::Clock(RCL_ROS_TIME).now(), std::string("map"), &ctrl_msg);
     ctrl_signal_pub_->publish(ctrl_msg);
   }
   desired_state = ctrl.state;
 
-  rclcpp::Time tnow = rclcpp::Clock().now();
+  rclcpp::Time tnow = rclcpp::Clock(RCL_ROS_TIME).now();
   if (tnow >= next_vis_pub_time) {
     next_vis_pub_time = next_vis_pub_time + rclcpp::Duration::from_seconds(1.0 / visualization_msg_rate);
     if (p_smm_vis_) {
@@ -148,7 +148,8 @@ int main(int argc, char** argv) {
   rclcpp::init(argc, argv);
   auto node = std::make_shared<rclcpp::Node>("onlane_ai_agent");
 
-  next_vis_pub_time = node->now();
+  // next_vis_pub_time = rclcpp::Clock(RCL_ROS_TIME).now();
+  next_vis_pub_time = node->get_clock()->now();  
 
   node->declare_parameter<int>("ego_id", 0);
   node->declare_parameter<std::string>("agent_config_path", "/home/tao/Desktop/Autonomous-Motorsports-Motion-Planning-for-the-IAC/EPSILON/src/core/playgrounds/highway_lite/agent_config.json");

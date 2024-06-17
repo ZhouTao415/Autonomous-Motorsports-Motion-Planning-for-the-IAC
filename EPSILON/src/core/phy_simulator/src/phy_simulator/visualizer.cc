@@ -6,15 +6,18 @@ namespace phy_simulator {
 
 Visualizer::Visualizer(rclcpp::Node::SharedPtr node) : node_(node) {
   vehicle_set_pub_ =
-      node_->create_publisher<visualization_msgs::msg::MarkerArray>("/phy_simulator_planning_node/vis/vehicle_set_vis", 10);
+      node_->create_publisher<visualization_msgs::msg::MarkerArray>(
+        "/phy_simulator_planning_node/vis/vehicle_set_vis", 10);
   lane_net_pub_ =
-      node_->create_publisher<visualization_msgs::msg::MarkerArray>("/phy_simulator_planning_node/vis/lane_net_vis", 10);
-  obstacle_set_pub_ = node_->create_publisher<visualization_msgs::msg::MarkerArray>(
-      "/phy_simulator_planning_node/vis/obstacle_set_vis", 10);
+      node_->create_publisher<visualization_msgs::msg::MarkerArray>(
+        "/phy_simulator_planning_node/vis/lane_net_vis", 10);
+  obstacle_set_pub_ = 
+      node_->create_publisher<visualization_msgs::msg::MarkerArray>(
+        "/phy_simulator_planning_node/vis/obstacle_set_vis", 10);
 }
 
 void Visualizer::VisualizeData() {
-  auto time_stamp = node_->now();
+  auto time_stamp = node_->get_clock()->now();
   VisualizeDataWithStamp(time_stamp);
   // SendTfWithStamp(time_stamp);
 }

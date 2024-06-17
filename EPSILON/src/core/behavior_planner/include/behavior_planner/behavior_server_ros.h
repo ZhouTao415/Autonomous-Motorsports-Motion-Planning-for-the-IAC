@@ -41,28 +41,48 @@ class BehaviorPlannerServer : public rclcpp::Node {
     return server;
   }
 
+  // BehaviorPlannerServer(std::shared_ptr<rclcpp::Node> node, double work_rate, int ego_id)
+  //     : Node("behavior_planner_server", node->get_node_options()), work_rate_(work_rate), ego_id_(ego_id), node_(node) {}
+  BehaviorPlannerServer(std::shared_ptr<rclcpp::Node> node, double work_rate, int ego_id)
+      : Node("behavior_planner_server", node->get_node_options()), work_rate_(work_rate), ego_id_(ego_id), node_(node) {}
+
+
   void PushSemanticMap(const SemanticMapManager &smm);
   void BindBehaviorUpdateCallback(std::function<int(const SemanticMapManager &)> fn);
 
+  /**
+   * @brief set the level of autonomous driving
+   */
   void set_autonomous_level(int level);
+
+  /**
+   * @brief set desired velocity
+   */
   void set_user_desired_velocity(const decimal_t desired_vel);
+
   void set_aggressive_level(int level);
 
   decimal_t user_desired_velocity() const;
+
   decimal_t reference_desired_velocity() const;
 
   void enable_hmi_interface();
+
   void Init();
+
   void Start();
-  BehaviorPlannerServer(std::shared_ptr<rclcpp::Node> node, double work_rate, int ego_id)
-      : Node("behavior_planner_server", node->get_node_options()), work_rate_(work_rate), ego_id_(ego_id), node_(node) {}
+  
 
  private:
 
   void PlanCycleCallback();
+
   void JoyCallback(const sensor_msgs::msg::Joy::ConstSharedPtr msg);
-  void PublishData();
+
   void Replan();
+  
+  void PublishData();
+  
   void MainThread();
 
   Config config_;
@@ -75,11 +95,11 @@ class BehaviorPlannerServer : public rclcpp::Node {
   decimal_t global_init_stamp_{0.0};
 
   // ros related
+  std::shared_ptr<rclcpp::Node> node_;
   rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr joy_sub_;
 
   double work_rate_;
   int ego_id_;
-  std::shared_ptr<rclcpp::Node> node_;
 
   // input buffer
   std::unique_ptr<moodycamel::ReaderWriterQueue<SemanticMapManager>> p_input_smm_buff_;

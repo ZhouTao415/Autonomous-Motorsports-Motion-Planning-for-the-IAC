@@ -22,8 +22,8 @@ namespace planning {
 
 class BehaviorPlannerVisualizer {
  public:
-  BehaviorPlannerVisualizer(std::shared_ptr<rclcpp::Node> nh, BehaviorPlanner* ptr_bp, int ego_id)
-      : nh_(nh), ego_id_(ego_id) {
+  BehaviorPlannerVisualizer(std::shared_ptr<rclcpp::Node> node, BehaviorPlanner* ptr_bp, int ego_id)
+      : node_(node), ego_id_(ego_id) {
     p_bp_ = ptr_bp;
   }
 
@@ -31,7 +31,7 @@ class BehaviorPlannerVisualizer {
     std::string forward_traj_topic = std::string("/vis/agent_") +
                                      std::to_string(ego_id_) +
                                      std::string("/forward_trajs");
-    forward_traj_vis_pub_ = nh_->create_publisher<visualization_msgs::msg::MarkerArray>(forward_traj_topic, 1);
+    forward_traj_vis_pub_ = node_->create_publisher<visualization_msgs::msg::MarkerArray>(forward_traj_topic, 1);
   }
 
   void PublishDataWithStamp(const rclcpp::Time& stamp) {
@@ -65,8 +65,8 @@ class BehaviorPlannerVisualizer {
   }
 
  private:
-  // rclcpp::Node::SharedPtr nh_;
-  std::shared_ptr<rclcpp::Node> nh_;
+  // rclcpp::Node::SharedPtr node_;
+  std::shared_ptr<rclcpp::Node> node_;
   int ego_id_;
 
   int last_forward_trajs_marker_cnt_ = 0;

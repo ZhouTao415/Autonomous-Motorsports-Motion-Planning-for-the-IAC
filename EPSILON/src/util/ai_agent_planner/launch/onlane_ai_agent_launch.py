@@ -28,7 +28,7 @@ def generate_launch_description():
     )
 
     nodes = []
-    for i in range(1, 11):
+    for i in range(1, 2):
         nodes.append(Node(
             package='ai_agent_planner',
             executable='onlane_ai_agent',
