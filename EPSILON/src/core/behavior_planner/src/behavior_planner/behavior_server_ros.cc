@@ -2,6 +2,18 @@
 
 namespace planning {
 
+BehaviorPlannerServer::BehaviorPlannerServer(std::shared_ptr<rclcpp::Node> node, int ego_id)
+  : node_(node), work_rate_(20.0), ego_id_(ego_id) {
+    p_visualizer_ = std::make_unique<BehaviorPlannerVisualizer>(node, &bp_, ego_id);
+    p_input_smm_buff_ = std::make_unique<moodycamel::ReaderWriterQueue<SemanticMapManager>>(config_.kInputBufferSize);
+}
+
+BehaviorPlannerServer::BehaviorPlannerServer(std::shared_ptr<rclcpp::Node> node, double work_rate, int ego_id)
+  : node_(node), work_rate_(work_rate), ego_id_(ego_id) {
+    p_visualizer_ = std::make_unique<BehaviorPlannerVisualizer>(node, &bp_, ego_id);
+    p_input_smm_buff_ = std::make_unique<moodycamel::ReaderWriterQueue<SemanticMapManager>>(config_.kInputBufferSize);
+}
+
 void BehaviorPlannerServer::PushSemanticMap(const SemanticMapManager &smm) {
   if (p_input_smm_buff_) p_input_smm_buff_->try_enqueue(smm);
 }
@@ -35,7 +47,10 @@ void BehaviorPlannerServer::JoyCallback(const sensor_msgs::msg::Joy::ConstShared
   }
 
   if (msg_id != ego_id_) return;
-
+  // ~ buttons[2] --> 1 -->  lcl
+  // ~ buttons[1] --> 1 -->  lcr
+  // ~ buttons[3] --> 1 -->  +1m/s
+  // ~ buttons[0] --> 1 -->  -1m/s
   if (msg->buttons[0] == 0 && msg->buttons[1] == 0 && msg->buttons[2] == 0 && msg->buttons[3] == 0)
     return;
 
@@ -57,8 +72,10 @@ void BehaviorPlannerServer::Start() {
 
 void BehaviorPlannerServer::MainThread() {
   using namespace std::chrono;
-  auto current_start_time = system_clock::now();
-  auto next_start_time = current_start_time;
+  system_clock::time_point current_start_time{system_clock::now()};
+  system_clock::time_point next_start_time{current_start_time};
+  // auto current_start_time = system_clock::now();
+  // auto next_start_time = current_start_time;
   const milliseconds interval(static_cast<int>(1000.0 / work_rate_));
   while (rclcpp::ok()) {
     current_start_time = system_clock::now();

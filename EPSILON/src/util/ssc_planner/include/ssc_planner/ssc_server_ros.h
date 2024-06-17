@@ -37,8 +37,9 @@ class SscPlannerServer {
     int kInputBufferSize{100};
   };
 
-  static std::shared_ptr<SscPlannerServer> Create(std::shared_ptr<rclcpp::Node> node, int ego_id);
-  static std::shared_ptr<SscPlannerServer> Create(std::shared_ptr<rclcpp::Node> node, double work_rate, int ego_id);
+  SscPlannerServer(std::shared_ptr<rclcpp::Node> node, int ego_id);
+
+  SscPlannerServer(std::shared_ptr<rclcpp::Node> node, double work_rate, int ego_id);
 
   void PushSemanticMap(const SemanticMapManager &smm);
 
@@ -46,17 +47,18 @@ class SscPlannerServer {
 
   void Start();
 
-  SscPlannerServer(std::shared_ptr<rclcpp::Node> node, int ego_id);
-  SscPlannerServer(std::shared_ptr<rclcpp::Node> node, double work_rate, int ego_id);
 
  private:
-  void Initialize();
   void PlanCycleCallback();
+  
   void Replan();
+  
   void PublishData();
+  
   void MainThread();
 
-  ErrorType FilterSingularityState(const vec_E<common::State> &hist, common::State *filter_state);
+  ErrorType FilterSingularityState(const vec_E<common::State> &hist, 
+                                   common::State *filter_state);
 
   Config config_;
 
@@ -73,9 +75,9 @@ class SscPlannerServer {
   decimal_t global_init_stamp_{0.0};
 
   // ROS2 related
+  std::shared_ptr<rclcpp::Node> node_;
   decimal_t work_rate_ = 20.0;
   int ego_id_;
-  std::shared_ptr<rclcpp::Node> node_;
 
   bool require_intervention_signal_ = false;
   rclcpp::Publisher<vehicle_msgs::msg::ControlSignal>::SharedPtr ctrl_signal_pub_;
@@ -83,9 +85,10 @@ class SscPlannerServer {
   rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr executing_traj_vis_pub_;
 
   // input buffer
-  moodycamel::ReaderWriterQueue<SemanticMapManager> *p_input_smm_buff_;
+  std::unique_ptr<moodycamel::ReaderWriterQueue<SemanticMapManager>> p_input_smm_buff_ {nullptr};
+
   SemanticMapManager last_smm_;
-  std::unique_ptr<semantic_map_manager::Visualizer> p_smm_vis_;
+  std::unique_ptr<semantic_map_manager::Visualizer> p_smm_vis_ {nullptr};
   std::unique_ptr<SscVisualizer> p_ssc_vis_;
   int last_trajmk_cnt_{0};
 

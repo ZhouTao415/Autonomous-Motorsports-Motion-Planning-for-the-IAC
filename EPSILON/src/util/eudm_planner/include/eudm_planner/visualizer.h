@@ -6,12 +6,16 @@
 #include <iostream>
 #include <vector>
 
+#include <rclcpp/rclcpp.hpp>
+#include <tf2/LinearMath/Transform.h>
+#include <tf2_ros/transform_broadcaster.h>
+
 #include "common/basics/basics.h"
 #include "common/basics/semantics.h"
 #include "common/state/state.h"
+#include "common/visualization/common_visualization_util.h"
 #include "eudm_planner/eudm_manager.h"
 #include "eudm_planner/eudm_planner.h"
-#include <rclcpp/rclcpp.hpp>
 #include "visualization_msgs/msg/marker_array.hpp"
 
 namespace planning {
@@ -83,12 +87,12 @@ class EudmPlannerVisualizer {
  private:
   std::shared_ptr<rclcpp::Node> node_;
   int ego_id_;
-  EudmManager* p_bp_manager_{nullptr};
   bool use_sim_state_ = true;
 
   int last_forward_trajs_marker_cnt_ = 0;
 
   rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr forward_traj_vis_pub_;
+  EudmManager* p_bp_manager_{nullptr};
 
 };
 

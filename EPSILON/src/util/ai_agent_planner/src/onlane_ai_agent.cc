@@ -3,6 +3,9 @@
 #include <memory>
 #include <random>
 
+#include <stdlib.h>
+#include "rclcpp/rclcpp.hpp"
+
 #include "behavior_planner/behavior_server_ros.h"
 #include "common/basics/tic_toc.h"
 #include "forward_simulator/multimodal_forward.h"
@@ -10,7 +13,6 @@
 #include "semantic_map_manager/ros_adapter.h"
 #include "semantic_map_manager/semantic_map_manager.h"
 #include "semantic_map_manager/visualizer.h"
-#include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/joy.hpp"
 #include "vehicle_msgs/msg/control_signal.hpp"
 #include "vehicle_msgs/encoder.h"
@@ -74,7 +76,7 @@ void RandomBehavior() {
     vel_noise = dist_vel(rng);
     if (p_bp_server_) {
       p_bp_server_->set_user_desired_velocity(desired_vel + vel_noise);
-      printf("[OnlaneAi]%d - desired velocity: %lf\n", ego_id, desired_vel + vel_noise);
+      RCLCPP_INFO(rclcpp::get_logger("onlane_ai_agent"), "[OnlaneAi]%d - desired velocity: %lf", ego_id, desired_vel + vel_noise);
     } else {
       RCLCPP_WARN(rclcpp::get_logger("onlane_ai_agent"), "p_bp_server_ is nullptr in RandomBehavior");
     }
@@ -84,7 +86,9 @@ void RandomBehavior() {
 }
 
 void PublishControl() {
-  if (!has_init_state || !p_bp_server_ || !p_ctrl_input_smm_buff_) return;
+  if (!has_init_state) return;
+  if (p_bp_server_ == nullptr) return;
+  if (p_ctrl_input_smm_buff_ == nullptr) return;
 
   bool is_map_updated = false;
   decimal_t previous_stamp = last_smm.time_stamp();
@@ -120,6 +124,7 @@ void PublishControl() {
           ego_vehicle, leading_vehicle, delta_t, sim_param,
           &state) != kSuccess) {
     printf("[AiAgent]Err-Simulation error (with leading vehicle).\n");
+    RCLCPP_ERROR(rclcpp::get_logger("onlane_ai_agent"), "[AiAgent]Err-Simulation error (with leading vehicle).");
     return;
   }
 
@@ -132,14 +137,17 @@ void PublishControl() {
   }
   desired_state = ctrl.state;
 
-  rclcpp::Time tnow = rclcpp::Clock(RCL_ROS_TIME).now();
-  if (tnow >= next_vis_pub_time) {
-    next_vis_pub_time = next_vis_pub_time + rclcpp::Duration::from_seconds(1.0 / visualization_msg_rate);
-    if (p_smm_vis_) {
-      p_smm_vis_->VisualizeDataWithStamp(tnow, last_smm);
-      p_smm_vis_->SendTfWithStamp(tnow, last_smm);
-    } else {
-      RCLCPP_WARN(rclcpp::get_logger("onlane_ai_agent"), "p_smm_vis_ is nullptr in PublishControl");
+  // visualization
+  {
+    rclcpp::Time tnow = rclcpp::Clock(RCL_ROS_TIME).now();
+    if (tnow >= next_vis_pub_time) {
+      next_vis_pub_time += rclcpp::Duration::from_seconds(1.0 / visualization_msg_rate);
+      if (p_smm_vis_) {
+        p_smm_vis_->VisualizeDataWithStamp(tnow, last_smm);
+        p_smm_vis_->SendTfWithStamp(tnow, last_smm);
+      } else {
+        RCLCPP_WARN(rclcpp::get_logger("onlane_ai_agent"), "p_smm_vis_ is nullptr in PublishControl");
+      }
     }
   }
 }
@@ -151,16 +159,23 @@ int main(int argc, char** argv) {
   // next_vis_pub_time = rclcpp::Clock(RCL_ROS_TIME).now();
   next_vis_pub_time = node->get_clock()->now();  
 
-  node->declare_parameter<int>("ego_id", 0);
-  node->declare_parameter<std::string>("agent_config_path", "/home/tao/Desktop/Autonomous-Motorsports-Motion-Planning-for-the-IAC/EPSILON/src/core/playgrounds/highway_lite/agent_config.json");
-  node->declare_parameter<double>("desired_vel", 6.0);
-  node->declare_parameter<int>("autonomous_level", 2);
-  node->declare_parameter<int>("aggressiveness_level", 3);
+  ego_id = 0;
+  double desired_vel = 6.0;
+  int autonomous_level = 3;
+  int aggressiveness_level = 3;
+  std::string agent_config_path = "/home/tao/Desktop/Autonomous-Motorsports-Motion-Planning-for-the-IAC/EPSILON/src/core/playgrounds/highway_lite/agent_config.json";
+  
+  node->declare_parameter<int>("ego_id", ego_id);
+  node->declare_parameter<std::string>("agent_config_path", agent_config_path);
+  node->declare_parameter<double>("desired_vel", desired_vel);
+  node->declare_parameter<int>("autonomous_level", aggressiveness_level);
+  node->declare_parameter<int>("aggressiveness_level", aggressiveness_level);
 
-  double desired_vel;
-  int autonomous_level;
-  int aggressiveness_level;
-  std::string agent_config_path;
+  node->get_parameter("ego_id", ego_id);
+  node->get_parameter("desired_vel", desired_vel);
+  node->get_parameter("agent_config_path", agent_config_path);
+  node->get_parameter("autonomous_level", autonomous_level);
+  node->get_parameter("aggressiveness_level", aggressiveness_level);
 
   if (!node->get_parameter("ego_id", ego_id)) {
     RCLCPP_ERROR(node->get_logger(), "Failed to get parameter: ego_id");
@@ -168,6 +183,12 @@ int main(int argc, char** argv) {
     RCLCPP_INFO(node->get_logger(), "ego_id: %d", ego_id);
   }
 
+  if (!node->get_parameter("desired_vel", desired_vel)) {
+    RCLCPP_ERROR(node->get_logger(), "Failed to get parameter: desired_vel");
+  } else {
+    RCLCPP_INFO(node->get_logger(), "desired_vel: %f", desired_vel);
+  }
+  
   if (!node->get_parameter("agent_config_path", agent_config_path)) {
     RCLCPP_ERROR(node->get_logger(), "Failed to get parameter: agent_config_path");
   } else {
@@ -186,11 +207,6 @@ int main(int argc, char** argv) {
     RCLCPP_INFO(node->get_logger(), "aggressiveness_level: %d", aggressiveness_level);
   }
 
-  if (!node->get_parameter("desired_vel", desired_vel)) {
-    RCLCPP_ERROR(node->get_logger(), "Failed to get parameter: desired_vel");
-  } else {
-    RCLCPP_INFO(node->get_logger(), "desired_vel: %f", desired_vel);
-  }
 
   try {
     ctrl_signal_pub_ = node->create_publisher<vehicle_msgs::msg::ControlSignal>("ctrl", 10);
@@ -198,13 +214,15 @@ int main(int argc, char** argv) {
     rng.seed(std::chrono::high_resolution_clock::now().time_since_epoch().count());
 
     planning::MultiModalForward::ParamLookUp(aggressiveness_level, &sim_param);
-    printf("[OnlaneAi]%d - aggresive: %d\n", ego_id, aggressiveness_level);
+    RCLCPP_INFO(node->get_logger(), "[OnlaneAi]%d - aggresive: %d", ego_id, aggressiveness_level);
 
+    // Declare smm
     auto semantic_map_manager = std::make_shared<semantic_map_manager::SemanticMapManager>(ego_id, agent_config_path);
     auto smm_ros_adapter = std::make_shared<semantic_map_manager::RosAdapter>(node, semantic_map_manager.get());
     p_smm_vis_ = std::make_shared<semantic_map_manager::Visualizer>(node, ego_id);
 
-    p_bp_server_ = planning::BehaviorPlannerServer::Create(node, bp_work_rate, ego_id);
+    // Declare bp
+    p_bp_server_ = std::make_shared<planning::BehaviorPlannerServer>(node, bp_work_rate, ego_id);
     if (p_bp_server_ == nullptr) {
       RCLCPP_ERROR(node->get_logger(), "Failed to create BehaviorPlannerServer");
       return -1;

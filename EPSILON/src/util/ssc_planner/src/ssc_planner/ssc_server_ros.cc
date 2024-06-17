@@ -2,31 +2,18 @@
 
 namespace planning {
 
-std::shared_ptr<SscPlannerServer> SscPlannerServer::Create(std::shared_ptr<rclcpp::Node> node, int ego_id) {
-  auto server = std::shared_ptr<SscPlannerServer>(new SscPlannerServer(node, ego_id));
-  server->Initialize();
-  return server;
-}
-
-std::shared_ptr<SscPlannerServer> SscPlannerServer::Create(std::shared_ptr<rclcpp::Node> node, double work_rate, int ego_id) {
-  auto server = std::shared_ptr<SscPlannerServer>(new SscPlannerServer(node, work_rate, ego_id));
-  server->Initialize();
-  return server;
-}
-
 SscPlannerServer::SscPlannerServer(std::shared_ptr<rclcpp::Node> node, int ego_id)
     : node_(node), work_rate_(20.0), ego_id_(ego_id) {
-  p_input_smm_buff_ = new moodycamel::ReaderWriterQueue<SemanticMapManager>(config_.kInputBufferSize);
+  p_input_smm_buff_ = std::make_unique<moodycamel::ReaderWriterQueue<SemanticMapManager>>(config_.kInputBufferSize);
+  p_smm_vis_ = std::make_unique<semantic_map_manager::Visualizer>(node, ego_id);
+  p_ssc_vis_ = std::make_unique<SscVisualizer>(node, ego_id);
 }
 
 SscPlannerServer::SscPlannerServer(std::shared_ptr<rclcpp::Node> node, double work_rate, int ego_id)
     : node_(node), work_rate_(work_rate), ego_id_(ego_id) {
-  p_input_smm_buff_ = new moodycamel::ReaderWriterQueue<SemanticMapManager>(config_.kInputBufferSize);
-}
-
-void SscPlannerServer::Initialize() {
-  p_smm_vis_ = std::make_unique<semantic_map_manager::Visualizer>(node_, ego_id_);
-  p_ssc_vis_ = std::make_unique<SscVisualizer>(node_, ego_id_);
+  p_input_smm_buff_ = std::make_unique<moodycamel::ReaderWriterQueue<SemanticMapManager>>(config_.kInputBufferSize);
+  p_smm_vis_ = std::make_unique<semantic_map_manager::Visualizer>(node, ego_id);
+  p_ssc_vis_ = std::make_unique<SscVisualizer>(node, ego_id);
 }
 
 void SscPlannerServer::PushSemanticMap(const SemanticMapManager& smm) {
@@ -38,62 +25,74 @@ void SscPlannerServer::PublishData() {
   auto current_time = node_->now();
 
   // smm visualization
-  p_smm_vis_->VisualizeDataWithStamp(current_time, last_smm_);
-  p_smm_vis_->SendTfWithStamp(current_time, last_smm_);
+  {
+    p_smm_vis_->VisualizeDataWithStamp(current_time, last_smm_);
+    p_smm_vis_->SendTfWithStamp(current_time, last_smm_);
+  }
 
   // ssc visualization
-  TicToc timer;
-  p_ssc_vis_->VisualizeDataWithStamp(current_time, planner_);
-  RCLCPP_INFO(node_->get_logger(), "ssc vis all time cost: %lf ms", timer.toc());
+  {
+    TicToc timer;
+    p_ssc_vis_->VisualizeDataWithStamp(current_time, planner_);
+    RCLCPP_INFO(node_->get_logger(), "ssc vis all time cost: %lf ms", timer.toc());
+  }
 
   // trajectory feedback
-  if (executing_traj_ == nullptr || !executing_traj_->IsValid()) return;
+  {
+    if (executing_traj_ == nullptr || !executing_traj_->IsValid()) return;
 
-  if (use_sim_state_) {
-    RCLCPP_INFO(node_->get_logger(), "use_sim_state_: true.");
-  } else {
-    RCLCPP_INFO(node_->get_logger(), "use_sim_state_: false.");
-  }
-
-  if (use_sim_state_) {
-    decimal_t plan_horizon = 1.0 / work_rate_;
-    int num_cycles =
-        std::floor((current_time.seconds() - executing_traj_->begin()) / plan_horizon);
-    decimal_t ct = executing_traj_->begin() + num_cycles * plan_horizon;
-    common::State state;
-    if (executing_traj_->GetState(ct, &state) == kSuccess) {
-      FilterSingularityState(ctrl_state_hist_, &state);
-      ctrl_state_hist_.push_back(state);
-      if (ctrl_state_hist_.size() > 100)
-        ctrl_state_hist_.erase(ctrl_state_hist_.begin());
-      vehicle_msgs::msg::ControlSignal ctrl_msg;
-      vehicle_msgs::Encoder::GetRosControlSignalFromControlSignal(
-          common::VehicleControlSignal(state), current_time, std::string("map"), &ctrl_msg);
-      ctrl_signal_pub_->publish(ctrl_msg);
+    if (use_sim_state_) {
+      RCLCPP_INFO(node_->get_logger(), "use_sim_state_: true.");
     } else {
-      RCLCPP_WARN(node_->get_logger(), "cannot evaluate state at %lf with begin %lf.", ct, executing_traj_->begin());
+      RCLCPP_INFO(node_->get_logger(), "use_sim_state_: false.");
+    }
+
+    if (use_sim_state_) {
+      decimal_t plan_horizon = 1.0 / work_rate_;
+      int num_cycles =
+          std::floor((current_time.seconds() - executing_traj_->begin()) / plan_horizon);
+      decimal_t ct = executing_traj_->begin() + num_cycles * plan_horizon;
+      {
+        common::State state;
+        if (executing_traj_->GetState(ct, &state) == kSuccess) {
+          FilterSingularityState(ctrl_state_hist_, &state);
+          ctrl_state_hist_.push_back(state);
+          if (ctrl_state_hist_.size() > 100)
+            ctrl_state_hist_.erase(ctrl_state_hist_.begin());
+          vehicle_msgs::msg::ControlSignal ctrl_msg;
+          vehicle_msgs::Encoder::GetRosControlSignalFromControlSignal(
+              common::VehicleControlSignal(state), current_time, std::string("map"), &ctrl_msg);
+          ctrl_signal_pub_->publish(ctrl_msg);
+        } else {
+          RCLCPP_WARN(node_->get_logger(), "cannot evaluate state at %lf with begin %lf.", ct, executing_traj_->begin());
+        }
+      }
+    }
+  
+
+    // trajectory visualization
+    {   
+      auto color = common::cmap["magenta"];
+      if (require_intervention_signal_) color = common::cmap["yellow"];
+      visualization_msgs::msg::MarkerArray traj_mk_arr;
+      
+      common::VisualizationUtil::GetMarkerArrayByTrajectory(
+          *executing_traj_, 0.1, Vecf<3>(0.3, 0.3, 0.3), color, 0.5, &traj_mk_arr);
+      if (require_intervention_signal_) {
+        visualization_msgs::msg::Marker traj_status;
+        common::State state_begin;
+        executing_traj_->GetState(executing_traj_->begin(), &state_begin);
+        Vec3f pos = Vec3f(state_begin.vec_position[0], state_begin.vec_position[1], 5.0);
+        common::VisualizationUtil::GetRosMarkerTextUsingPositionAndString(
+            pos, std::string("Intervention Needed!"), common::cmap["red"], Vec3f(5.0, 5.0, 5.0), 0, &traj_status);
+        traj_mk_arr.markers.push_back(traj_status);
+      }
+      int num_traj_mks = static_cast<int>(traj_mk_arr.markers.size());
+      common::VisualizationUtil::FillHeaderIdInMarkerArray(current_time, std::string("map"), last_trajmk_cnt_, &traj_mk_arr);
+      last_trajmk_cnt_ = num_traj_mks;
+      executing_traj_vis_pub_->publish(traj_mk_arr);
     }
   }
-
-  // trajectory visualization
-  auto color = common::cmap["magenta"];
-  if (require_intervention_signal_) color = common::cmap["yellow"];
-  visualization_msgs::msg::MarkerArray traj_mk_arr;
-  common::VisualizationUtil::GetMarkerArrayByTrajectory(
-      *executing_traj_, 0.1, Vecf<3>(0.3, 0.3, 0.3), color, 0.5, &traj_mk_arr);
-  if (require_intervention_signal_) {
-    visualization_msgs::msg::Marker traj_status;
-    common::State state_begin;
-    executing_traj_->GetState(executing_traj_->begin(), &state_begin);
-    Vec3f pos = Vec3f(state_begin.vec_position[0], state_begin.vec_position[1], 5.0);
-    common::VisualizationUtil::GetRosMarkerTextUsingPositionAndString(
-        pos, std::string("Intervention Needed!"), common::cmap["red"], Vec3f(5.0, 5.0, 5.0), 0, &traj_status);
-    traj_mk_arr.markers.push_back(traj_status);
-  }
-  int num_traj_mks = static_cast<int>(traj_mk_arr.markers.size());
-  common::VisualizationUtil::FillHeaderIdInMarkerArray(current_time, std::string("map"), last_trajmk_cnt_, &traj_mk_arr);
-  last_trajmk_cnt_ = num_traj_mks;
-  executing_traj_vis_pub_->publish(traj_mk_arr);
 }
 
 ErrorType SscPlannerServer::FilterSingularityState(
@@ -122,9 +121,11 @@ ErrorType SscPlannerServer::FilterSingularityState(
 void SscPlannerServer::Init(const std::string& config_path) {
   planner_.Init(config_path);
 
-  std::string traj_topic = std::string("/vis/agent_") + std::to_string(ego_id_) + std::string("/ssc/exec_traj");
-  // node_->declare_parameter("use_sim_state", true);
-  // node_->get_parameter("use_sim_state", use_sim_state_);
+  std::string traj_topic = std::string("/vis/agent_") + 
+                           std::to_string(ego_id_) + 
+                           std::string("/ssc/exec_traj");
+  node_->declare_parameter("use_sim_state", true);
+  node_->get_parameter("use_sim_state", use_sim_state_);
 
   ctrl_signal_pub_ = node_->create_publisher<vehicle_msgs::msg::ControlSignal>("ctrl", 20);
   map_marker_pub_ = node_->create_publisher<visualization_msgs::msg::MarkerArray>("ssc_map", 1);

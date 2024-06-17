@@ -26,7 +26,7 @@
 
 namespace planning {
 
-class BehaviorPlannerServer : public rclcpp::Node {
+class BehaviorPlannerServer {
  public:
   using SemanticMapManager = semantic_map_manager::SemanticMapManager;
 
@@ -34,18 +34,8 @@ class BehaviorPlannerServer : public rclcpp::Node {
     int kInputBufferSize{100};
   };
 
-  static std::shared_ptr<BehaviorPlannerServer> Create(std::shared_ptr<rclcpp::Node> node, double work_rate, int ego_id) {
-    auto server = std::shared_ptr<BehaviorPlannerServer>(new BehaviorPlannerServer(node, work_rate, ego_id));
-    server->p_visualizer_ = std::make_unique<BehaviorPlannerVisualizer>(server, &(server->bp_), ego_id);
-    server->p_input_smm_buff_ = std::make_unique<moodycamel::ReaderWriterQueue<SemanticMapManager>>(server->config_.kInputBufferSize);
-    return server;
-  }
-
-  // BehaviorPlannerServer(std::shared_ptr<rclcpp::Node> node, double work_rate, int ego_id)
-  //     : Node("behavior_planner_server", node->get_node_options()), work_rate_(work_rate), ego_id_(ego_id), node_(node) {}
-  BehaviorPlannerServer(std::shared_ptr<rclcpp::Node> node, double work_rate, int ego_id)
-      : Node("behavior_planner_server", node->get_node_options()), work_rate_(work_rate), ego_id_(ego_id), node_(node) {}
-
+  BehaviorPlannerServer(std::shared_ptr<rclcpp::Node> node, int ego_id);
+  BehaviorPlannerServer(std::shared_ptr<rclcpp::Node> node, double work_rate, int ego_id);
 
   void PushSemanticMap(const SemanticMapManager &smm);
   void BindBehaviorUpdateCallback(std::function<int(const SemanticMapManager &)> fn);
@@ -98,15 +88,14 @@ class BehaviorPlannerServer : public rclcpp::Node {
   std::shared_ptr<rclcpp::Node> node_;
   rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr joy_sub_;
 
-  double work_rate_;
   int ego_id_;
+  double work_rate_;
 
   // input buffer
   std::unique_ptr<moodycamel::ReaderWriterQueue<SemanticMapManager>> p_input_smm_buff_;
-
   bool has_callback_binded_ = false;
+  
   std::function<int(const SemanticMapManager &)> private_callback_fn_;
-
   bool is_hmi_enabled_ = false;
 };
 

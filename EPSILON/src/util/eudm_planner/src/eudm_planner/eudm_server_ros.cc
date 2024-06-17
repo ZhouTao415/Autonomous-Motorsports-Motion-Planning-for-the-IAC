@@ -3,14 +3,14 @@
 namespace planning {
 
 EudmPlannerServer::EudmPlannerServer(std::shared_ptr<rclcpp::Node> node, int ego_id)
-    : rclcpp::Node("eudm_planner_server"), work_rate_(20.0), ego_id_(ego_id) {
+    : node_(node), work_rate_(20.0), ego_id_(ego_id) {
   p_visualizer_ = std::make_unique<EudmPlannerVisualizer>(node, &bp_manager_, ego_id);
   p_input_smm_buff_ = std::make_unique<moodycamel::ReaderWriterQueue<SemanticMapManager>>(config_.kInputBufferSize);
   task_.user_perferred_behavior = 0;
 }
 
 EudmPlannerServer::EudmPlannerServer(std::shared_ptr<rclcpp::Node> node, double work_rate, int ego_id)
-    : rclcpp::Node("eudm_planner_server"), work_rate_(work_rate), ego_id_(ego_id) {
+    : node_(node), work_rate_(work_rate), ego_id_(ego_id) {
   p_visualizer_ = std::make_unique<EudmPlannerVisualizer>(node, &bp_manager_, ego_id);
   p_input_smm_buff_ = std::make_unique<moodycamel::ReaderWriterQueue<SemanticMapManager>>(config_.kInputBufferSize);
   task_.user_perferred_behavior = 0;
@@ -21,16 +21,16 @@ void EudmPlannerServer::PushSemanticMap(const SemanticMapManager &smm) {
 }
 
 void EudmPlannerServer::PublishData() {
-  p_visualizer_->PublishDataWithStamp(this->get_clock()->now());
+  p_visualizer_->PublishDataWithStamp(node_->get_clock()->now());
 }
 
 void EudmPlannerServer::Init(const std::string &bp_config_path) {
   bp_manager_.Init(bp_config_path, work_rate_);
   auto joy_callback = std::bind(&EudmPlannerServer::JoyCallback, this, std::placeholders::_1);
-  joy_sub_ = this->create_subscription<sensor_msgs::msg::Joy>(
+  joy_sub_ = node_->create_subscription<sensor_msgs::msg::Joy>(
       "/joy", 10, joy_callback);
-  // this->declare_parameter("use_sim_state", use_sim_state_);
-  // this->get_parameter("use_sim_state", use_sim_state_);
+  node_->declare_parameter("use_sim_state", use_sim_state_);
+  node_->get_parameter("use_sim_state", use_sim_state_);
   p_visualizer_->Init();
   p_visualizer_->set_use_sim_state(use_sim_state_);
 }
@@ -43,7 +43,10 @@ void EudmPlannerServer::JoyCallback(const sensor_msgs::msg::Joy::ConstSharedPtr 
     msg_id = std::stoi(msg->header.frame_id);
   }
   if (msg_id != ego_id_) return;
-
+  // ~ buttons[2] --> 1 -->  lcl
+  // ~ buttons[1] --> 1 -->  lcr
+  // ~ buttons[3] --> 1 -->  +1m/s
+  // ~ buttons[0] --> 1 -->  -1m/s
   if (msg->buttons[0] == 0 && msg->buttons[1] == 0 && msg->buttons[2] == 0 &&
       msg->buttons[3] == 0 && msg->buttons[4] == 0 && msg->buttons[5] == 0 &&
       msg->buttons[6] == 0)

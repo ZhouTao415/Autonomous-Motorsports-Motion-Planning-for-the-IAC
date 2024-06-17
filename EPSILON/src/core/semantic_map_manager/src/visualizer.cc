@@ -50,7 +50,7 @@ Visualizer::Visualizer(rclcpp::Node::SharedPtr node, int node_id)
 void Visualizer::VisualizeData(const SemanticMapManager &smm) {
   if (smm.time_stamp() < kEPS) return;  // if time stamp unset, return
   // auto time_stamp = node_->now();
-  auto time_stamp = rclcpp::Time(smm.time_stamp() * 1e9);
+  auto time_stamp = rclcpp::Time(smm.time_stamp() * 1e9);  
   VisualizeDataWithStamp(time_stamp, smm);
   SendTfWithStamp(time_stamp, smm);
 }

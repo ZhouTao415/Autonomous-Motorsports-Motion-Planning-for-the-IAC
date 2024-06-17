@@ -26,7 +26,7 @@
 #include "visualization_msgs/msg/marker_array.hpp"
 
 namespace planning {
-class EudmPlannerServer : public rclcpp::Node {
+class EudmPlannerServer {
  public:
   using SemanticMapManager = semantic_map_manager::SemanticMapManager;
   using DcpAction = DcpTree::DcpAction;
@@ -48,6 +48,9 @@ class EudmPlannerServer : public rclcpp::Node {
 
   void set_user_desired_velocity(const decimal_t desired_vel);
 
+  /**
+   * @brief set desired velocity
+   */
   decimal_t user_desired_velocity() const;
 
   void Init(const std::string &bp_config_path);
@@ -55,7 +58,6 @@ class EudmPlannerServer : public rclcpp::Node {
   void Start();
 
  private:
-  rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr joy_sub_; 
 
   void PlanCycleCallback();
 
@@ -81,6 +83,10 @@ class EudmPlannerServer : public rclcpp::Node {
 
   planning::eudm::Task task_;
   bool use_sim_state_ = true;
+
+  // ros related
+  std::shared_ptr<rclcpp::Node> node_;
+  rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr joy_sub_; 
 
   double work_rate_{20.0};
   int ego_id_;
