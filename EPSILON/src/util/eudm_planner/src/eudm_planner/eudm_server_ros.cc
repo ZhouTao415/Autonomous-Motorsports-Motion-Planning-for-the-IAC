@@ -29,7 +29,7 @@ void EudmPlannerServer::Init(const std::string &bp_config_path) {
   auto joy_callback = std::bind(&EudmPlannerServer::JoyCallback, this, std::placeholders::_1);
   joy_sub_ = node_->create_subscription<sensor_msgs::msg::Joy>(
       "/joy", 10, joy_callback);
-  node_->declare_parameter("use_sim_state", use_sim_state_);
+  // node_->declare_parameter("use_sim_state", use_sim_state_);
   node_->get_parameter("use_sim_state", use_sim_state_);
   p_visualizer_->Init();
   p_visualizer_->set_use_sim_state(use_sim_state_);

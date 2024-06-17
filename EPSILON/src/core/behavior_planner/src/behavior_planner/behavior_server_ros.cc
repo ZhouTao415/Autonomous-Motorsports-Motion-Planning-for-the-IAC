@@ -29,7 +29,7 @@ void BehaviorPlannerServer::Init() {
         "/joy", 10, std::bind(&BehaviorPlannerServer::JoyCallback, this, std::placeholders::_1));
   }
   bool use_sim_state = true;
-  node_->declare_parameter("use_sim_state", use_sim_state);
+  // node_->declare_parameter("use_sim_state", use_sim_state);
   node_->get_parameter("use_sim_state", use_sim_state);
   bp_.set_use_sim_state(use_sim_state);
   p_visualizer_->Init();
