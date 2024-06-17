@@ -163,8 +163,8 @@ int main(int argc, char** argv) {
   double desired_vel = 6.0;
   int autonomous_level = 3;
   int aggressiveness_level = 3;
-  std::string agent_config_path = "/home/tao/Desktop/Autonomous-Motorsports-Motion-Planning-for-the-IAC/EPSILON/src/core/playgrounds/highway_lite/agent_config.json";
-  
+  std::string agent_config_path = "";
+
   node->declare_parameter<int>("ego_id", ego_id);
   node->declare_parameter<std::string>("agent_config_path", agent_config_path);
   node->declare_parameter<double>("desired_vel", desired_vel);

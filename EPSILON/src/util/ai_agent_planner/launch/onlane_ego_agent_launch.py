@@ -24,7 +24,7 @@ def generate_launch_description():
         'playground', default_value='highway_v1.0'
     )
 
-    node_0 = Node(
+    onlane_ai_agent_node_0 = Node(
         package='ai_agent_planner',
         executable='onlane_ai_agent',
         name='onlane_ai_agent_0',
@@ -40,10 +40,10 @@ def generate_launch_description():
             'autonomous_level': LaunchConfiguration('global_autonomous_level')
         }],
         remappings=[
-            ('/ai_agent_planner_0/arena_info', LaunchConfiguration('arena_info_topic')),
-            ('/ai_agent_planner_0/arena_info_static', LaunchConfiguration('arena_info_static_topic')),
-            ('/ai_agent_planner_0/arena_info_dynamic', LaunchConfiguration('arena_info_dynamic_topic')),
-            ('/ai_agent_planner_0/ctrl', '/ctrl/agent_0')
+            ('arena_info', LaunchConfiguration('arena_info_topic')),
+            ('arena_info_static', LaunchConfiguration('arena_info_static_topic')),
+            ('arena_info_dynamic', LaunchConfiguration('arena_info_dynamic_topic')),
+            ('ctrl', '/ctrl/agent_0')
         ]
     )
 
@@ -61,5 +61,5 @@ def generate_launch_description():
         LogInfo(msg=['global_autonomous_level: ', LaunchConfiguration('global_autonomous_level')]),
         LogInfo(msg=['playground: ', LaunchConfiguration('playground')]),
         LogInfo(msg="Launching node..."),
-        node_0
+        onlane_ai_agent_node_0
     ])

@@ -27,9 +27,9 @@ def generate_launch_description():
         'playground', default_value='highway_lite'
     )
 
-    nodes = []
+    onlane_ai_agent_nodes = []
     for i in range(1, 2):
-        nodes.append(Node(
+        onlane_ai_agent_nodes.append(Node(
             package='ai_agent_planner',
             executable='onlane_ai_agent',
             name=f'onlane_ai_agent_{i}',
@@ -46,10 +46,14 @@ def generate_launch_description():
                 'aggressiveness_level': LaunchConfiguration('global_aggressiveness_level')
             }],
             remappings=[
-                (f'/ai_agent_planner_{i}/arena_info', LaunchConfiguration('arena_info_topic')),
-                (f'/ai_agent_planner_{i}/arena_info_static', LaunchConfiguration('arena_info_static_topic')),
-                (f'/ai_agent_planner_{i}/arena_info_dynamic', LaunchConfiguration('arena_info_dynamic_topic')),
-                (f'/ai_agent_planner_{i}/ctrl', f'/ctrl/agent_{i}')
+                # (f'/ai_agent_planner_{i}/arena_info', LaunchConfiguration('arena_info_topic')),
+                # (f'/ai_agent_planner_{i}/arena_info_static', LaunchConfiguration('arena_info_static_topic')),
+                # (f'/ai_agent_planner_{i}/arena_info_dynamic', LaunchConfiguration('arena_info_dynamic_topic')),
+                # (f'/ai_agent_planner_{i}/ctrl', f'/ctrl/agent_{i}')
+                ('arena_info', LaunchConfiguration('arena_info_topic')),
+                ('arena_info_static', LaunchConfiguration('arena_info_static_topic')),
+                ('arena_info_dynamic', LaunchConfiguration('arena_info_dynamic_topic')),
+                ('ctrl', f'/ctrl/agent_{i}')
             ]
         ))
 
@@ -69,5 +73,5 @@ def generate_launch_description():
         LogInfo(msg=['global_aggressiveness_level: ', LaunchConfiguration('global_aggressiveness_level')]),
         LogInfo(msg=['playground: ', LaunchConfiguration('playground')]),
         LogInfo(msg="Launching nodes..."),
-        *nodes
+        *onlane_ai_agent_nodes
     ])
