@@ -46,10 +46,6 @@ def generate_launch_description():
                 'aggressiveness_level': LaunchConfiguration('global_aggressiveness_level')
             }],
             remappings=[
-                # (f'/ai_agent_planner_{i}/arena_info', LaunchConfiguration('arena_info_topic')),
-                # (f'/ai_agent_planner_{i}/arena_info_static', LaunchConfiguration('arena_info_static_topic')),
-                # (f'/ai_agent_planner_{i}/arena_info_dynamic', LaunchConfiguration('arena_info_dynamic_topic')),
-                # (f'/ai_agent_planner_{i}/ctrl', f'/ctrl/agent_{i}')
                 ('arena_info', LaunchConfiguration('arena_info_topic')),
                 ('arena_info_static', LaunchConfiguration('arena_info_static_topic')),
                 ('arena_info_dynamic', LaunchConfiguration('arena_info_dynamic_topic')),

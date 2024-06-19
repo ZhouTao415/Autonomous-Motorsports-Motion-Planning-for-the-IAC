@@ -109,6 +109,9 @@ ros2 run rviz2 rviz2 --display-config phy_simulator_planning.rviz
 2. Launch the planner's node and AI nodes:
 ```
 ros2 launch planning_integrated test_ssc_with_eudm_ros_launch.py
+```
+
+```
 ros2 launch ai_agent_planner onlane_ai_agent_launch.py
 ```
 
