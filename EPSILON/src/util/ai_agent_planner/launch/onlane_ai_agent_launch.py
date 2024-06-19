@@ -18,7 +18,7 @@ def generate_launch_description():
         'global_desired_vel', default_value='10.0'
     )
     global_autonomous_level = DeclareLaunchArgument(
-        'global_autonomous_level', default_value='2'
+        'global_autonomous_level', default_value='3'
     )
     global_aggressiveness_level = DeclareLaunchArgument(
         'global_aggressiveness_level', default_value='4'
@@ -28,7 +28,7 @@ def generate_launch_description():
     )
 
     onlane_ai_agent_nodes = []
-    for i in range(1, 2):
+    for i in range(1, 11):
         onlane_ai_agent_nodes.append(Node(
             package='ai_agent_planner',
             executable='onlane_ai_agent',

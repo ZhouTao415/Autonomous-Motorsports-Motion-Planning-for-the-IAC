@@ -43,9 +43,9 @@ int cnt = 0;
 int aggressiveness_level = 3;
 
 int SemanticMapUpdateCallback(const semantic_map_manager::SemanticMapManager& smm) {
-  RCLCPP_INFO(rclcpp::get_logger("onlane_ai_agent"), "SemanticMapUpdateCallback called");
+  // RCLCPP_INFO(rclcpp::get_logger("onlane_ai_agent"), "SemanticMapUpdateCallback called");
   if (p_bp_server_) {
-    RCLCPP_INFO(rclcpp::get_logger("onlane_ai_agent"), "Pushing SemanticMap to BehaviorPlannerServer");
+    // RCLCPP_INFO(rclcpp::get_logger("onlane_ai_agent"), "Pushing SemanticMap to BehaviorPlannerServer");
     p_bp_server_->PushSemanticMap(smm);
   } else {
     RCLCPP_WARN(rclcpp::get_logger("onlane_ai_agent"), "p_bp_server_ is nullptr in SemanticMapUpdateCallback");
@@ -60,9 +60,9 @@ int SemanticMapUpdateCallback(const semantic_map_manager::SemanticMapManager& sm
 }
 
 int BehaviorUpdateCallback(const semantic_map_manager::SemanticMapManager& smm) {
-  RCLCPP_INFO(rclcpp::get_logger("onlane_ai_agent"), "BehaviorUpdateCallback called");
+  // RCLCPP_INFO(rclcpp::get_logger("onlane_ai_agent"), "BehaviorUpdateCallback called");
   if (p_ctrl_input_smm_buff_) {
-    RCLCPP_INFO(rclcpp::get_logger("onlane_ai_agent"), "Enqueuing SemanticMap for control input");
+    // RCLCPP_INFO(rclcpp::get_logger("onlane_ai_agent"), "Enqueuing SemanticMap for control input");
     p_ctrl_input_smm_buff_->try_enqueue(smm);
   } else {
     RCLCPP_WARN(rclcpp::get_logger("onlane_ai_agent"), "p_ctrl_input_smm_buff_ is nullptr in BehaviorUpdateCallback");
@@ -123,7 +123,6 @@ void PublishControl() {
           common::StateTransformer(last_smm.ego_behavior().ref_lane),
           ego_vehicle, leading_vehicle, delta_t, sim_param,
           &state) != kSuccess) {
-    printf("[AiAgent]Err-Simulation error (with leading vehicle).\n");
     RCLCPP_ERROR(rclcpp::get_logger("onlane_ai_agent"), "[AiAgent]Err-Simulation error (with leading vehicle).");
     return;
   }
@@ -143,6 +142,7 @@ void PublishControl() {
     if (tnow >= next_vis_pub_time) {
       next_vis_pub_time += rclcpp::Duration::from_seconds(1.0 / visualization_msg_rate);
       if (p_smm_vis_) {
+        // RCLCPP_INFO(rclcpp::get_logger("onlane_ai_agent"), "Publishing visualization data.");
         p_smm_vis_->VisualizeDataWithStamp(tnow, last_smm);
         p_smm_vis_->SendTfWithStamp(tnow, last_smm);
       } else {
@@ -159,7 +159,7 @@ int main(int argc, char** argv) {
   // next_vis_pub_time = rclcpp::Clock(RCL_ROS_TIME).now();
   next_vis_pub_time = node->get_clock()->now();  
 
-  ego_id = 0;
+
   double desired_vel = 6.0;
   int autonomous_level = 3;
   int aggressiveness_level = 3;

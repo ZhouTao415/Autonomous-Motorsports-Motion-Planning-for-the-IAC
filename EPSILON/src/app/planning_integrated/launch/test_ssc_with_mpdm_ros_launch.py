@@ -46,9 +46,9 @@ def generate_launch_description():
                 ])
             }],
             remappings=[
-                ('/planning_integrated/arena_info_static', LaunchConfiguration('arena_info_static_topic')),
-                ('/planning_integrated/arena_info_dynamic', LaunchConfiguration('arena_info_dynamic_topic')),
-                ('/planning_integrated/ctrl', LaunchConfiguration('ctrl_topic'))
+                ('arena_info_static', LaunchConfiguration('arena_info_static_topic')),
+                ('arena_info_dynamic', LaunchConfiguration('arena_info_dynamic_topic')),
+                ('ctrl', LaunchConfiguration('ctrl_topic'))
             ]
         )
     ])

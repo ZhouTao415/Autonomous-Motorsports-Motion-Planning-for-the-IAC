@@ -10,12 +10,14 @@ Panels:
         - /ArenaInfo1/ObstacleSet1
         - /ArenaInfo1/LaneSet1
         - /ArenaInfo1/VehiclePathSet1
+        - /ArenaInfo1/VehicleSet1
         - /Agent_01
         - /Agent_01/ObstacleMap1
         - /Agent_01/EgoVehicle1
         - /Agent_01/EgoVehicle1/Topic1
         - /Agent_01/EgoVehicle1/Namespaces1
         - /Agent_01/EgoBehavior1
+        - /Agent_01/EgoBehavior1/Topic1
         - /Agent_01/PredTrajOpenloop1
         - /Agent_01/PredInitialIntention1
         - /Agent_01/SurroundingLaneNet1
@@ -25,6 +27,11 @@ Panels:
         - /Agent_01/SurroundingVehicles1
         - /Agent_01/SurroundingVehicles1/Topic1
         - /Agent_01/SpeedLimit1
+        - /Agent_01/SscTraj1
+        - /Agent_01/RssStatus1
+        - /Agent_01/UncertainBehavior1
+        - /Agent_01/CriticalAgentTraj1
+        - /Agent_01/CriticalEgoTraj1
         - /AgentDebug1/Vehicles1
       Splitter Ratio: 0.34040045738220215
     Tree Height: 1109
@@ -54,65 +61,19 @@ Visualization Manager:
   Class: ""
   Displays:
     - Class: rviz_default_plugins/TF
-      Enabled: true
+      Enabled: false
       Frame Timeout: 15
       Frames:
         All Enabled: true
-        ego_vehicle_vis_0:
-          Value: true
-        ego_vehicle_vis_1:
-          Value: true
-        ego_vehicle_vis_10:
-          Value: true
-        ego_vehicle_vis_2:
-          Value: true
-        ego_vehicle_vis_3:
-          Value: true
-        ego_vehicle_vis_4:
-          Value: true
-        ego_vehicle_vis_5:
-          Value: true
-        ego_vehicle_vis_6:
-          Value: true
-        ego_vehicle_vis_7:
-          Value: true
-        ego_vehicle_vis_8:
-          Value: true
-        ego_vehicle_vis_9:
-          Value: true
-        map:
-          Value: true
       Marker Scale: 5
       Name: TF
       Show Arrows: true
       Show Axes: true
       Show Names: true
       Tree:
-        map:
-          ego_vehicle_vis_0:
-            {}
-          ego_vehicle_vis_1:
-            {}
-          ego_vehicle_vis_10:
-            {}
-          ego_vehicle_vis_2:
-            {}
-          ego_vehicle_vis_3:
-            {}
-          ego_vehicle_vis_4:
-            {}
-          ego_vehicle_vis_5:
-            {}
-          ego_vehicle_vis_6:
-            {}
-          ego_vehicle_vis_7:
-            {}
-          ego_vehicle_vis_8:
-            {}
-          ego_vehicle_vis_9:
-            {}
+        {}
       Update Interval: 0
-      Value: true
+      Value: false
     - Class: rviz_default_plugins/Axes
       Enabled: true
       Length: 3
@@ -186,7 +147,7 @@ Visualization Manager:
             Durability Policy: Volatile
             History Policy: Keep Last
             Reliability Policy: Reliable
-            Value: visualization_marker_array
+            Value: /phy_simulator_planning_node/vis/vehicle_set_vis
           Value: false
       Enabled: true
       Name: ArenaInfo
@@ -214,17 +175,17 @@ Visualization Manager:
           Use Timestamp: false
           Value: false
         - Class: rviz_default_plugins/MarkerArray
-          Enabled: false
+          Enabled: true
           Name: EgoVehicle
           Namespaces:
-            {}
+            "": true
           Topic:
             Depth: 5
             Durability Policy: Volatile
-            History Policy: Keep All
-            Reliability Policy: System Default
+            History Policy: Keep Last
+            Reliability Policy: Reliable
             Value: /vis/agent_0/ego_vehicle_vis
-          Value: false
+          Value: true
         - Class: rviz_default_plugins/MarkerArray
           Enabled: true
           Name: EgoBehavior
@@ -265,13 +226,13 @@ Visualization Manager:
           Enabled: true
           Name: SurroundingLaneNet
           Namespaces:
-            {}
+            "": true
           Topic:
             Depth: 5
             Durability Policy: Volatile
             History Policy: Keep Last
             Reliability Policy: Reliable
-            Value: visualization_marker_array
+            Value: /vis/agent_0/surrounding_lane_net_vis
           Value: true
         - Class: rviz_default_plugins/MarkerArray
           Enabled: true
@@ -307,7 +268,7 @@ Visualization Manager:
             Durability Policy: Volatile
             History Policy: Keep Last
             Reliability Policy: Reliable
-            Value: /vis/agent_1/ego_vehicle_vis
+            Value: /vis/agent_0/surrounding_vehicle_vis
           Value: true
         - Class: rviz_default_plugins/MarkerArray
           Enabled: true
@@ -319,22 +280,22 @@ Visualization Manager:
             Durability Policy: Volatile
             History Policy: Keep Last
             Reliability Policy: Reliable
-            Value: /vis/agent_1/pred_traj_openloop_vis
+            Value: /vis/agent_0/speed_limit
           Value: true
         - Class: rviz_default_plugins/MarkerArray
           Enabled: true
           Name: SscTraj
           Namespaces:
-            {}
+            "": true
           Topic:
             Depth: 5
             Durability Policy: Volatile
             History Policy: Keep Last
             Reliability Policy: Reliable
-            Value: visualization_marker_array
+            Value: /vis/agent_0/ssc/exec_traj
           Value: true
         - Class: rviz_default_plugins/MarkerArray
-          Enabled: true
+          Enabled: false
           Name: RssStatus
           Namespaces:
             {}
@@ -344,7 +305,7 @@ Visualization Manager:
             History Policy: Keep Last
             Reliability Policy: Reliable
             Value: visualization_marker_array
-          Value: true
+          Value: false
         - Class: rviz_default_plugins/MarkerArray
           Enabled: false
           Name: UncertainBehavior
@@ -358,7 +319,7 @@ Visualization Manager:
             Value: visualization_marker_array
           Value: false
         - Class: rviz_default_plugins/MarkerArray
-          Enabled: true
+          Enabled: false
           Name: CriticalAgentTraj
           Namespaces:
             {}
@@ -368,9 +329,9 @@ Visualization Manager:
             History Policy: Keep Last
             Reliability Policy: Reliable
             Value: visualization_marker_array
-          Value: true
+          Value: false
         - Class: rviz_default_plugins/MarkerArray
-          Enabled: true
+          Enabled: false
           Name: CriticalEgoTraj
           Namespaces:
             {}
@@ -379,8 +340,8 @@ Visualization Manager:
             Durability Policy: Volatile
             History Policy: Keep Last
             Reliability Policy: Reliable
-            Value: visualization_marker_array
-          Value: true
+            Value: /vis/agent_2/forward_trajs
+          Value: false
       Enabled: true
       Name: Agent_0
     - Class: rviz_common/Group
@@ -481,25 +442,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/ThirdPersonFollower
-      Distance: 315.7597961425781
+      Distance: 29.80401611328125
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 400.3797912597656
-        Y: -113.87765502929688
-        Z: 0.000597659032791853
+        X: 7.325550079345703
+        Y: 12.58668327331543
+        Z: 0.000557257910259068
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.5297964215278625
+      Pitch: 0.41479718685150146
       Target Frame: ego_vehicle_vis_0
       Value: ThirdPersonFollower (rviz)
-      Yaw: 2.159928560256958
+      Yaw: 1.6012941598892212
     Saved: ~
 Window Geometry:
   Displays:

@@ -7,10 +7,10 @@ from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 def generate_launch_description():
     # Declare launch arguments
     arena_info_static_topic = DeclareLaunchArgument(
-        'arena_info_static_topic', default_value='/planning_integrated/arena_info_static'
+        'arena_info_static_topic', default_value='/arena_info_static'
     )
     arena_info_dynamic_topic = DeclareLaunchArgument(
-        'arena_info_dynamic_topic', default_value='/planning_integrated/arena_info_dynamic'
+        'arena_info_dynamic_topic', default_value='/arena_info_dynamic'
     )
     ctrl_topic = DeclareLaunchArgument(
         'ctrl_topic', default_value='/ctrl/agent_0'
@@ -46,9 +46,9 @@ def generate_launch_description():
             ])
         }],
         remappings=[
-            ('/arena_info_static', LaunchConfiguration('arena_info_static_topic')),
-            ('/arena_info_dynamic', LaunchConfiguration('arena_info_dynamic_topic')),
-            ('/ctrl', LaunchConfiguration('ctrl_topic'))
+            ('arena_info_static', LaunchConfiguration('arena_info_static_topic')),
+            ('arena_info_dynamic', LaunchConfiguration('arena_info_dynamic_topic')),
+            ('ctrl', LaunchConfiguration('ctrl_topic'))
         ]
     )
 

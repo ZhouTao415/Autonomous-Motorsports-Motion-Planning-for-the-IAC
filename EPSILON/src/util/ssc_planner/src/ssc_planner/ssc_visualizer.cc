@@ -15,9 +15,9 @@ SscVisualizer::SscVisualizer(rclcpp::Node::SharedPtr node, int node_id)
   std::string forward_trajs_vis_topic = std::string("/vis/agent_") +
                                         std::to_string(node_id_) +
                                         std::string("/ssc/forward_trajs_vis");
-  std::string sur_vehicle_trajs_vis_topic =
-      std::string("/vis/agent_") + std::to_string(node_id_) +
-      std::string("/ssc/sur_vehicle_trajs_vis");
+  std::string sur_vehicle_trajs_vis_topic = std::string("/vis/agent_") + 
+                                            std::to_string(node_id_) +
+                                            std::string("/ssc/sur_vehicle_trajs_vis");
   std::string corridor_vis_topic = std::string("/vis/agent_") +
                                    std::to_string(node_id_) +
                                    std::string("/ssc/corridor_vis");
@@ -25,17 +25,12 @@ SscVisualizer::SscVisualizer(rclcpp::Node::SharedPtr node, int node_id)
                              std::to_string(node_id_) +
                              std::string("/ssc/qp_vis");
 
-  ssc_map_pub_ =
-      node_->create_publisher<visualization_msgs::msg::MarkerArray>(ssc_map_vis_topic, 1);
+  ssc_map_pub_ = node_->create_publisher<visualization_msgs::msg::MarkerArray>(ssc_map_vis_topic, 1);
   qp_pub_ = node_->create_publisher<visualization_msgs::msg::MarkerArray>(qp_vis_topic, 1);
-  ego_vehicle_pub_ =
-      node_->create_publisher<visualization_msgs::msg::MarkerArray>(ego_vehicle_vis_topic, 1);
-  forward_trajs_pub_ = node_->create_publisher<visualization_msgs::msg::MarkerArray>(
-      forward_trajs_vis_topic, 1);
-  sur_vehicle_trajs_pub_ = node_->create_publisher<visualization_msgs::msg::MarkerArray>(
-      sur_vehicle_trajs_vis_topic, 1);
-  corridor_pub_ =
-      node_->create_publisher<visualization_msgs::msg::MarkerArray>(corridor_vis_topic, 1);
+  ego_vehicle_pub_ = node_->create_publisher<visualization_msgs::msg::MarkerArray>(ego_vehicle_vis_topic, 1);
+  forward_trajs_pub_ = node_->create_publisher<visualization_msgs::msg::MarkerArray>(forward_trajs_vis_topic, 1);
+  sur_vehicle_trajs_pub_ = node_->create_publisher<visualization_msgs::msg::MarkerArray>(sur_vehicle_trajs_vis_topic, 1);
+  corridor_pub_ = node_->create_publisher<visualization_msgs::msg::MarkerArray>(corridor_vis_topic, 1);
 }
 
 void SscVisualizer::VisualizeDataWithStamp(const rclcpp::Time &stamp,

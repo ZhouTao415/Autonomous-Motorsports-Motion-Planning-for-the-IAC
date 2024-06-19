@@ -156,4 +156,8 @@ install(EXPORT hkust_pl_export
   DESTINATION share/${PROJECT_NAME}/cmake
 )
 
+install(DIRECTORY materials/
+  DESTINATION share/${PROJECT_NAME}/materials
+)
+
 ament_package()

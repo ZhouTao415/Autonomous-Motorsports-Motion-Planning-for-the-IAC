@@ -23,5 +23,6 @@
 
   <export>
     <build_type>ament_cmake</build_type>
+    <material>materials</material>
   </export>
 </package>
