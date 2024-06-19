@@ -29,9 +29,14 @@ Panels:
         - /Agent_01/SpeedLimit1
         - /Agent_01/SscTraj1
         - /Agent_01/RssStatus1
+        - /Agent_01/RssStatus1/Topic1
         - /Agent_01/UncertainBehavior1
         - /Agent_01/CriticalAgentTraj1
         - /Agent_01/CriticalEgoTraj1
+        - /AgentDebug1
+        - /AgentDebug1/EgoVehicle1
+        - /AgentDebug1/DesiredGapInfo1
+        - /AgentDebug1/Behavior1
         - /AgentDebug1/Vehicles1
       Splitter Ratio: 0.34040045738220215
     Tree Height: 1109
@@ -135,7 +140,7 @@ Visualization Manager:
             Durability Policy: Volatile
             History Policy: Keep Last
             Reliability Policy: Reliable
-            Value: /phy_simulator_planning_node/vis/vehicle_set_vis
+            Value: /phy_simulator_planning_node/vis/obstacle_set_vis
           Value: false
         - Class: rviz_default_plugins/MarkerArray
           Enabled: false
@@ -301,10 +306,10 @@ Visualization Manager:
             {}
           Topic:
             Depth: 5
-            Durability Policy: Volatile
+            Durability Policy: System Default
             History Policy: Keep Last
             Reliability Policy: Reliable
-            Value: visualization_marker_array
+            Value: /vis/agent_0/ssc/exec_traj
           Value: false
         - Class: rviz_default_plugins/MarkerArray
           Enabled: false
@@ -347,8 +352,20 @@ Visualization Manager:
     - Class: rviz_common/Group
       Displays:
         - Class: rviz_default_plugins/MarkerArray
-          Enabled: false
+          Enabled: true
           Name: EgoVehicle
+          Namespaces:
+            {}
+          Topic:
+            Depth: 5
+            Durability Policy: Volatile
+            History Policy: Keep Last
+            Reliability Policy: Reliable
+            Value: /vis/agent_0/ego_vehicle_vis
+          Value: true
+        - Class: rviz_default_plugins/MarkerArray
+          Enabled: false
+          Name: DesiredGapInfo
           Namespaces:
             {}
           Topic:
@@ -360,18 +377,6 @@ Visualization Manager:
           Value: false
         - Class: rviz_default_plugins/MarkerArray
           Enabled: true
-          Name: DesiredGapInfo
-          Namespaces:
-            {}
-          Topic:
-            Depth: 5
-            Durability Policy: Volatile
-            History Policy: Keep Last
-            Reliability Policy: Reliable
-            Value: visualization_marker_array
-          Value: true
-        - Class: rviz_default_plugins/MarkerArray
-          Enabled: false
           Name: Behavior
           Namespaces:
             {}
@@ -380,8 +385,8 @@ Visualization Manager:
             Durability Policy: Volatile
             History Policy: Keep Last
             Reliability Policy: Reliable
-            Value: visualization_marker_array
-          Value: false
+            Value: /vis/agent_0/ego_behavior_vis
+          Value: true
         - Class: rviz_default_plugins/MarkerArray
           Enabled: false
           Name: Vehicles
@@ -442,25 +447,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/ThirdPersonFollower
-      Distance: 29.80401611328125
+      Distance: 24.29824447631836
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 7.325550079345703
-        Y: 12.58668327331543
-        Z: 0.000557257910259068
+        X: 1.417514443397522
+        Y: 9.774068832397461
+        Z: 0.0005362813826650381
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.41479718685150146
+      Pitch: 0.6947975158691406
       Target Frame: ego_vehicle_vis_0
       Value: ThirdPersonFollower (rviz)
-      Yaw: 1.6012941598892212
+      Yaw: 2.496295928955078
     Saved: ~
 Window Geometry:
   Displays:

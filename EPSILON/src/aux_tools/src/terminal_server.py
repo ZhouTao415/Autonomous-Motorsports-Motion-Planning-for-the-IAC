@@ -5,17 +5,24 @@
 # @date 2019-02
 # @copyright Copyright (c) 2019
 
+# sys
 import time
 import sys
-import rclpy
-from rclpy.node import Node
 import shutil
 import random
 from math import *
 from functools import reduce
+
+# pygame
 import pygame as pg
 from pygame.locals import *
 from pygame.math import Vector2
+# ROS2
+import rclpy
+from rclpy.node import Node
+from rclpy.clock import Clock
+
+# msg
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import Joy
 from vehicle_msgs.msg import ArenaInfoDynamic
@@ -37,21 +44,65 @@ center_3dof = (0.0, 0.0, 0.0)
 state_seq = []
 has_arena_info_dynamic = False
 
+class TerminalServerNode(Node):
+    def __init__(self):
+        super().__init__('key2joy')
+        self.joy_pub = self.create_publisher(Joy, '/joy', 10)
+        self.create_subscription(ArenaInfoDynamic, "/arena_info_dynamic", self.process_arena_info_dynamic, 10)
+        self.create_subscription(ArenaInfoStatic, "/arena_info_static", self.process_arena_info_static, 10)
+        self.create_subscription(ControlSignal, "/ctrl/agent_0", self.process_control_signal, 10)
+        self.timer = self.create_timer(1.0 / 50.0, self.timer_callback)  # 50 Hz
+
+    def timer_callback(self):
+        handle_keyboard_event(self.joy_pub)
+        update_visualization()
+        pg.display.update()
+
+    def process_arena_info_dynamic(self, data):
+        global center_3dof, has_arena_info_dynamic
+        for v in data.vehicle_set.vehicles:
+            vehicles[v.id.data] = v.state
+            if v.id.data not in recorded_ids:
+                recorded_ids.append(v.id.data)
+                screen_rect = screen.get_rect()
+                all_sprites.add(Vehicle(screen_rect, v.id.data, (v.state.vec_position.x,
+                                                                 v.state.vec_position.y, v.state.angle)))
+        center_3dof = (vehicles[ego_id].vec_position.x,
+                       vehicles[ego_id].vec_position.y, vehicles[ego_id].angle)
+        has_arena_info_dynamic = True
+
+    def process_arena_info_static(self, data):
+        global lane_pts
+        if has_arena_info_dynamic:
+            visible_range = 150.0
+            del lane_pts[:]
+            for lane in data.lane_net.lanes:
+                points = []
+                for pt in lane.points:
+                    if abs(pt.x - center_3dof[0]) < visible_range and abs(pt.y - center_3dof[1]) < visible_range:
+                        points.append(project_world_to_image((pt.x, pt.y, 0.0)))
+                if len(points) > 2:
+                    lane_pts.append(points)
+
+    def process_control_signal(self, data):
+        global state_seq
+        state_seq.append(data.state)
+        if len(state_seq) > 10:
+            state_seq.pop(0)
+
 def project_world_to_image(point_3dof):
     x = point_3dof[0] - center_3dof[0]
     y = point_3dof[1] - center_3dof[1]
     angle = center_3dof[2]
-    u = width/2 + scale * (x*sin(angle) - y * cos(angle))
-    v = height/2 - scale * (x*cos(angle) + y * sin(angle))
+    u = width / 2 + scale * (x * sin(angle) - y * cos(angle))
+    v = height / 2 - scale * (x * cos(angle) + y * sin(angle))
     return (u, v)
 
 class Wheel(pg.sprite.Sprite):
     def __init__(self, screen_rect):
         pg.sprite.Sprite.__init__(self)
-        self.original_image = pg.image.load(
-            "steer_wheel.png").convert_alpha()
-        self.original_image = pg.transform.rotozoom(
-            self.original_image, 0.0, 0.2)
+        self.original_image = pg.image.load("steer_wheel.png").convert_alpha()
+        self.original_image = pg.transform.rotozoom(self.original_image, 0.0, 0.2)
         self.image = self.original_image
         self.rect = self.image.get_rect()
         self.rect.center = (100, 100)
@@ -61,8 +112,8 @@ class Wheel(pg.sprite.Sprite):
         angle = angle * 180 / pi
         self.image = pg.transform.rotate(self.original_image, angle)
         x, y = self.rect.center
-        self.rect = self.image.get_rect()
-        self.rect.center = (x, y)
+        self.rect = self.image.get_rect()  # Replace old rect with new rect.
+        self.rect.center = (x, y)  # Put the new rect's center at old center.
 
 class Vehicle(pg.sprite.Sprite):
     def __init__(self, screen_rect, id, state_3dof):
@@ -70,16 +121,15 @@ class Vehicle(pg.sprite.Sprite):
         self.id = id
         self.state_3dof = state_3dof
         self.radius = 10
-        self.image = pg.Surface((self.radius*2, self.radius*2), pg.SRCALPHA)
+        self.image = pg.Surface((self.radius * 2, self.radius * 2), pg.SRCALPHA)
         if id == ego_id:
-            pg.draw.circle(self.image, pg.Color(
-                'darkolivegreen1'), (self.radius, self.radius), self.radius)
+            pg.draw.circle(
+                self.image, pg.Color('darkolivegreen1'), (self.radius, self.radius), self.radius)
         else:
-            pg.draw.circle(self.image, pg.Color(
-                'dodgerblue1'), (self.radius, self.radius), self.radius)
+            pg.draw.circle(
+                self.image, pg.Color('dodgerblue1'), (self.radius, self.radius), self.radius)
 
-        self.rect = self.image.get_rect(
-            center=project_world_to_image(state_3dof))
+        self.rect = self.image.get_rect(center=project_world_to_image(state_3dof))
         self.screen_rect = screen_rect
 
     def update(self):
@@ -91,12 +141,12 @@ def calc_current_steer_acc():
     if len(state_seq) < 2:
         return 0.0, 0.0
     steer_list = []
-    for i in range(len(state_seq)-1):
+    for i in range(len(state_seq) - 1):
         state1 = state_seq[i]
         steer = atan(state1.curvature * 2.85)
         steer_list.append(steer)
     ave_steer = reduce(lambda x, y: x + y, steer_list) / len(steer_list)
-    rotated_angle = ave_steer * 1.25 * (360.0/45.0)
+    rotated_angle = ave_steer * 1.25 * (360.0 / 45.0)
     return rotated_angle, state_seq[-1].acceleration
 
 def plot_lanes_on_screen():
@@ -131,7 +181,7 @@ def plot_ids_on_screen():
             '{}'.format(idx), True, (0, 255, 0))
         text_rect_obj = text_surface_obj.get_rect()
         u, v = project_world_to_image(state_3dof)
-        text_rect_obj.center = (u-20, v)
+        text_rect_obj.center = (u - 20, v)
         screen.blit(text_surface_obj, text_rect_obj)
 
 def plot_orientations_on_screen():
@@ -149,47 +199,7 @@ def plot_selected_rect_on_screen():
         agent_state = (vehicles[agent_id].vec_position.x,
                        vehicles[agent_id].vec_position.y, vehicles[agent_id].angle)
         u, v = project_world_to_image(agent_state)
-        pg.draw.rect(screen, pg.Color('aquamarine3'), (u-10, v-10, 20, 20), 3)
-
-class ROS2Node(Node):
-    def __init__(self):
-        super().__init__('key2joy')
-        self.joy_pub = self.create_publisher(Joy, '/joy', 10)
-        self.create_subscription(ArenaInfoDynamic, "/arena_info_dynamic", self.process_arena_info_dynamic, 10)
-        self.create_subscription(ArenaInfoStatic, "/arena_info_static", self.process_arena_info_static, 10)
-        self.create_subscription(ControlSignal, "/ctrl/agent_0", self.process_control_signal, 10)
-        
-    def process_arena_info_dynamic(self, data):
-        for v in data.vehicle_set.vehicles:
-            vehicles[v.id.data] = v.state
-            if v.id.data not in recorded_ids:
-                recorded_ids.append(v.id.data)
-                screen_rect = screen.get_rect()
-                all_sprites.add(Vehicle(screen_rect, v.id.data, (v.state.vec_position.x,
-                                                                 v.state.vec_position.y, v.state.angle)))
-        global center_3dof, has_arena_info_dynamic
-        center_3dof = (vehicles[ego_id].vec_position.x,
-                       vehicles[ego_id].vec_position.y, vehicles[ego_id].angle)
-        has_arena_info_dynamic = True
-
-    def process_arena_info_static(self, data):
-        global lane_pts
-        if has_arena_info_dynamic:
-            visible_range = 150.0
-            del lane_pts[:]
-            for lane in data.lane_net.lanes:
-                points = []
-                for pt in lane.points:
-                    if abs(pt.x - center_3dof[0]) < visible_range and abs(pt.y - center_3dof[1]) < visible_range:
-                        points.append(project_world_to_image((pt.x, pt.y, 0.0)))
-                if len(points) > 2:
-                    lane_pts.append(points)
-
-    def process_control_signal(self, data):
-        global state_seq
-        state_seq.append(data.state)
-        if len(state_seq) > 10:
-            state_seq.pop(0)
+        pg.draw.rect(screen, pg.Color('aquamarine3'), (u - 10, v - 10, 20, 20), 3)
 
 def update_visualization():
     if has_arena_info_dynamic:
@@ -202,29 +212,22 @@ def update_visualization():
         plot_speed_on_screen()
         plot_orientations_on_screen()
 
-def print_over_same_line(text):
-    terminal_width = shutil.get_terminal_size((80, 20)).columns
-    empty_space = max(0, terminal_width - len(text))
-    sys.stdout.write('\r' + text + empty_space * ' ')
-    sys.stdout.flush()
-
 def init_joy(frame_id):
     joy = Joy()
     joy.header.frame_id = frame_id
-    joy.header.stamp = ROS2Node().get_clock().now().to_msg()
+    joy.header.stamp = Clock().now().to_msg()
     for i in range(8):
         joy.axes.append(0.0)
     for i in range(11):
         joy.buttons.append(0)
     return joy
 
-def handle_keyboard_event(node):
+def handle_keyboard_event(joy_pub):
     global agent_id
     for event in pg.event.get():
         if event.type == pg.MOUSEBUTTONUP:
             pos = pg.mouse.get_pos()
-            clicked_sprites = [
-                s for s in all_sprites if s.rect.collidepoint(pos)]
+            clicked_sprites = [s for s in all_sprites if s.rect.collidepoint(pos)]
             if len(clicked_sprites) > 0:
                 if hasattr(clicked_sprites[0], 'id'):
                     agent_id = clicked_sprites[0].id
@@ -236,43 +239,40 @@ def handle_keyboard_event(node):
                 msg = 'Agent {}: Speed up'.format(agent_id)
                 print(msg)
                 joy.buttons[3] = 1
-                node.joy_pub.publish(joy)
+                joy_pub.publish(joy)
             elif event.key == pg.K_s:
                 msg = 'Agent {}: Brake'.format(agent_id)
                 print(msg)
                 joy.buttons[0] = 1
-                node.joy_pub.publish(joy)
+                joy_pub.publish(joy)
             elif event.key == pg.K_a:
                 msg = 'Agent {}: Lane change left'.format(agent_id)
                 print(msg)
                 joy.buttons[2] = 1
-                node.joy_pub.publish(joy)
+                joy_pub.publish(joy)
             elif event.key == pg.K_d:
                 msg = 'Agent {}: Lane change right'.format(agent_id)
                 print(msg)
                 joy.buttons[1] = 1
-                node.joy_pub.publish(joy)
+                joy_pub.publish(joy)
             elif event.key == pg.K_q:
-                msg = 'Agent {}: Toggle left lc feasible state'.format(
-                    agent_id)
+                msg = 'Agent {}: Toggle left lc feasible state'.format(agent_id)
                 print(msg)
                 joy.buttons[4] = 1
-                node.joy_pub.publish(joy)
+                joy_pub.publish(joy)
             elif event.key == pg.K_e:
-                msg = 'Agent {}: Toggle right lc feasible state'.format(
-                    agent_id)
+                msg = 'Agent {}: Toggle right lc feasible state'.format(agent_id)
                 print(msg)
                 joy.buttons[5] = 1
-                node.joy_pub.publish(joy)
+                joy_pub.publish(joy)
             elif event.key == pg.K_r:
                 msg = 'Agent {}: Toggle autonomous mode'.format(agent_id)
                 print(msg)
                 joy.buttons[6] = 1
-                node.joy_pub.publish(joy)
+                joy_pub.publish(joy)
 
 def main(args=None):
     rclpy.init(args=args)
-    node = ROS2Node()
     pg.init()
     screen.fill(pg.Color('cornsilk3'))
     screen_rect = screen.get_rect()
@@ -280,21 +280,14 @@ def main(args=None):
     all_sprites.draw(screen)
     pg.display.set_caption('Ultimate Vehicle Planning')
     pg.display.update()
-    rate = node.create_rate(50)
+
+    node = TerminalServerNode()
 
     print('Terminal server initialized.')
-    while rclpy.ok():
-        rclpy.spin_once(node)
-        handle_keyboard_event(node)
-        update_visualization()
-        pg.display.update()
-        rate.sleep()
+    rclpy.spin(node)
 
-    node.destroy_node()
+    pg.quit()
     rclpy.shutdown()
 
 if __name__ == '__main__':
-    try:
-        main()
-    except KeyboardInterrupt:
-        pass
+    main()

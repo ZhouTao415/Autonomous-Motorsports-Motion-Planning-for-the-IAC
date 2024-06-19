@@ -134,7 +134,7 @@ class BehaviorPlanner : public Planner {
 
   decimal_t user_desired_velocity_{5.0};
   decimal_t reference_desired_velocity_{5.0};
-  int autonomous_level_{2};
+  int autonomous_level_{3};
 
   decimal_t sim_resolution_{0.4};
   decimal_t sim_horizon_{4.0};

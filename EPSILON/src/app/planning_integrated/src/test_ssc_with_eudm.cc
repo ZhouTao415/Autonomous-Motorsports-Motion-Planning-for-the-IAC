@@ -44,10 +44,7 @@ int main(int argc, char** argv) {
   node->declare_parameter<std::string>("agent_config_path", agent_config_path);
   node->declare_parameter<std::string>("bp_config_path", bp_config_path);
   node->declare_parameter<std::string>("ssc_config_path", ssc_config_path);
-  // node->declare_parameter<std::string>("agent_config_path", "/home/tao/Desktop/Autonomous-Motorsports-Motion-Planning-for-the-IAC/EPSILON/src/core/playgrounds/highway_v1.0/agent_config.json");
-  // node->declare_parameter<std::string>("bp_config_path", "/home/tao/Desktop/Autonomous-Motorsports-Motion-Planning-for-the-IAC/EPSILON/src/util/eudm_planner/config/eudm_config.pb.txt");
-  // node->declare_parameter<std::string>("ssc_config_path", "/home/tao/Desktop/Autonomous-Motorsports-Motion-Planning-for-the-IAC/EPSILON/src/util/ssc_planner/config/ssc_config.pb.txt");
-
+  
   if (!node->get_parameter("ego_id", ego_id)) {
     RCLCPP_ERROR(node->get_logger(), "Failed to get parameter: ego_id");
   } else {
