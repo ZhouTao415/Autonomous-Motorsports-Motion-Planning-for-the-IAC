@@ -92,10 +92,10 @@ We use [Protocol Buffers](https://developers.google.com/protocol-buffers/) for p
 We recommend the users create an empty workspace. Clone the repo and build:
 ```
   cd ${YOUR_WORKSPACE_PATH}/src
-  git clone https://github.com/HKUST-Aerial-Robotics/EPSILON.git
-  cd ..
-  catkin_make
-  source ~/${YOUR_WORKSPACE_PATH}/devel/setup.bash
+  git clone https://github.com/ZhouTao415/Autonomous-Motorsports-Motion-Planning-for-the-IAC.git
+  cd EPSILON/
+  colcon build
+  source ~/${YOUR_WORKSPACE_PATH}/install/setup.bash
 ```
 
 ## Just have a try!
