@@ -32,7 +32,7 @@ def generate_launch_description():
             output='screen',
             parameters=[{
                 'ego_id': 0,
-                'desired_vel': 20.0,
+                'desired_vel': 60.0,
                 'use_sim_state': True,
                 'agent_config_path': PathJoinSubstitution([
                     get_package_share_directory('playgrounds'),

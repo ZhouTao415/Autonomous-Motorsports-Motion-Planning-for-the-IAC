@@ -15,7 +15,7 @@ def generate_launch_description():
         'arena_info_dynamic_topic', default_value='/arena_info_dynamic'
     )
     global_desired_vel = DeclareLaunchArgument(
-        'global_desired_vel', default_value='10.0'
+        'global_desired_vel', default_value='80.0'
     )
     global_autonomous_level = DeclareLaunchArgument(
         'global_autonomous_level', default_value='3'
