@@ -33,7 +33,7 @@ If you have any question, please feel free to contact us via `lzhangbz@connect.u
 
 
 ## Prerequisites
-This project has been tested on Ubuntu 16.04 (ROS Kinetic) and 18.04 (ROS Melodic). For ROS installation, please refer to the official [website](http://wiki.ros.org/ROS/Installation).
+This project has been tested on Ubuntu 22.04 (ROS2 humble). For ROS installation, please refer to the official [website](http://wiki.ros.org/ROS/Installation).
 
 ### Denpendencies
 
@@ -137,6 +137,12 @@ python3 terminal_server.py
 </p>
 
 You can select the target agent by clicking on the colored dots and change its behavior using `W-A-S-D` buttons.
+
+5. ros node & topic graph
+
+<p align="center">
+  <img src="misc/rosgraph.png" width = "600"/>
+</p>
 
 ## Acknowledgements
 We would like to express sincere thanks to the authors of the following tools and packages:
