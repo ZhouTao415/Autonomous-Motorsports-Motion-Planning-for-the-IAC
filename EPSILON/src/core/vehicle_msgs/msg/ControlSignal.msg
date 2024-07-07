@@ -6,8 +6,3 @@ float64 steer_rate
 # and omit the control loop
 std_msgs/Bool is_openloop
 State state
-
-
-
-
-
