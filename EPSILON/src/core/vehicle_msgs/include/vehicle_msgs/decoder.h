@@ -34,8 +34,7 @@ class Decoder {
  public:
   static ErrorType GetFreeStateMsgFromRosFreeState(
       const vehicle_msgs::msg::FreeState &in_state, common::FreeState *state) {
-    // state->time_stamp = rclcpp::Time(in_state.header.stamp).seconds();
-    state->time_stamp = in_state.header.stamp.sec;
+    state->time_stamp = rclcpp::Time(in_state.header.stamp).seconds();
     state->position[0] = in_state.pos.x;
     state->position[1] = in_state.pos.y;
     state->velocity[0] = in_state.vel.x;
@@ -48,8 +47,7 @@ class Decoder {
 
   static ErrorType GetStateFromRosStateMsg(const vehicle_msgs::msg::State &in_state,
                                            common::State *state) {
-    // state->time_stamp = rclcpp::Time(in_state.header.stamp).seconds();
-    state->time_stamp = in_state.header.stamp.sec;
+    state->time_stamp = rclcpp::Time(in_state.header.stamp).seconds();
     state->vec_position[0] = in_state.vec_position.x;
     state->vec_position[1] = in_state.vec_position.y;
     state->angle = in_state.angle;
