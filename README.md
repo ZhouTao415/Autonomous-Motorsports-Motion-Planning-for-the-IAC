@@ -1,8 +1,8 @@
-# EPSILON (Ros2 Version)
+# EPSILON (Ros2 Version on Ubuntu 22.04)
 
 ## About
 
-This is the project page of the paper "**EPSILON: An Efficient Planning System for Automated Vehicles in Highly Interactive Environments**". In this repo, we provide a simple and lightweight multi-agent simulator based on ROS and a demo implementation of the proposed EPSILON planning system.
+This is the project page of the paper "**EPSILON: An Efficient Planning System for Automated Vehicles in Highly Interactive Environments**". In this repo, we provide a simple and lightweight multi-agent simulator based on ROS2 and a demo implementation of the proposed EPSILON planning system.
 
 
 If you use EPSILON for your academic research, please consider citing the follow
