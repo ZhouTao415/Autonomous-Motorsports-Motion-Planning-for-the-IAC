@@ -97,6 +97,19 @@ We recommend the users create an empty workspace. Clone the repo and build:
   colcon build
   source ~/${YOUR_WORKSPACE_PATH}/install/setup.bash
 ```
+```
+├── EPSILON
+│   └── src
+│       ├── app
+│       ├── aux_tools
+│       ├── core
+│       ├── misc
+│       ├── README.md
+│       ├── toolchain
+│       └── util
+├── LICENSE
+└── README.md
+```
 
 ## Just have a try!
 
